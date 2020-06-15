@@ -4,6 +4,7 @@ import static com.google.gwt.dom.client.Style.Visibility.HIDDEN;
 import static com.google.gwt.dom.client.Style.Visibility.VISIBLE;
 
 import org.geogebra.common.awt.GAffineTransform;
+import org.geogebra.common.awt.GColor;
 import org.geogebra.common.awt.GGraphics2D;
 import org.geogebra.common.awt.GPoint2D;
 import org.geogebra.common.euclidian.EuclidianView;
@@ -15,6 +16,7 @@ import org.geogebra.web.richtext.impl.Carota;
 import org.geogebra.web.richtext.impl.CarotaTable;
 import org.geogebra.web.richtext.impl.CarotaUtil;
 
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.DOM;
@@ -22,9 +24,6 @@ import com.google.gwt.user.client.DOM;
 import elemental2.core.Global;
 
 public class InlineTableControllerW implements InlineTableController {
-
-	private static final int CELL_HEIGHT = 36;
-	private static final int CELL_WIDTH = 100;
 
 	private GeoInlineTable table;
 	private final EuclidianView view;
@@ -54,6 +53,16 @@ public class InlineTableControllerW implements InlineTableController {
 	}
 
 	@Override
+	public void setBackgroundColor(GColor backgroundColor) {
+		tableImpl.setBackgroundColor(backgroundColor == null ? null : backgroundColor.toString());
+	}
+
+	@Override
+	public String urlByCoordinate(int x, int y) {
+		return tableImpl.urlByCoordinate(x, y);
+	}
+
+	@Override
 	public void update() {
 		if (style != null && table.getLocation() != null) {
 			GPoint2D location = table.getLocation();
@@ -61,8 +70,8 @@ public class InlineTableControllerW implements InlineTableController {
 			setLocation(view.toScreenCoordX(location.x),
 					view.toScreenCoordY(location.y));
 
-			setWidth(2 * CELL_WIDTH + 3);
-			setHeight(2 * CELL_HEIGHT + 3);
+			setWidth(table.getWidth());
+			setHeight(table.getHeight());
 
 			setAngle(table.getAngle());
 		}
@@ -86,8 +95,10 @@ public class InlineTableControllerW implements InlineTableController {
 	@Override
 	public void toForeground(int x, int y) {
 		if (style != null) {
-			style.setVisibility(VISIBLE);
-			tableImpl.startEditing(x, y);
+			Scheduler.get().scheduleDeferred(() -> {
+				style.setVisibility(VISIBLE);
+				tableImpl.startEditing(x, y);
+			});
 		}
 	}
 
@@ -114,32 +125,68 @@ public class InlineTableControllerW implements InlineTableController {
 
 	@Override
 	public String getHyperLinkURL() {
-		return "";
+		return tableImpl.getFormatting("url", "");
 	}
 
 	@Override
 	public void setHyperlinkUrl(String url) {
-		// unimplemented - for now
+		tableImpl.setHyperlinkUrl(url);
 	}
 
 	@Override
 	public String getHyperlinkRangeText() {
-		return null;
+		return tableImpl.hyperlinkRange().plainText();
 	}
 
 	@Override
 	public void insertHyperlink(String url, String text) {
-		// unimplemented - for now
+		tableImpl.insertHyperlink(url, text);
 	}
 
 	@Override
 	public String getListStyle() {
-		return null;
+		return tableImpl.getListStyle();
 	}
 
 	@Override
 	public void switchListTo(String listType) {
-		// unimplemented - for now
+		tableImpl.switchListTo(listType);
+	}
+
+	@Override
+	public void insertRowAbove() {
+		tableImpl.insertRowAbove();
+		updateSizes();
+	}
+
+	@Override
+	public void insertRowBelow() {
+		tableImpl.insertRowBelow();
+		updateSizes();
+	}
+
+	@Override
+	public void insertColumnLeft() {
+		tableImpl.insertColumnLeft();
+		updateSizes();
+	}
+
+	@Override
+	public void insertColumnRight() {
+		tableImpl.insertColumnRight();
+		updateSizes();
+	}
+
+	@Override
+	public void removeRow() {
+		tableImpl.removeRow();
+		updateSizes();
+	}
+
+	@Override
+	public void removeColumn() {
+		tableImpl.removeColumn();
+		updateSizes();
 	}
 
 	@Override
@@ -149,13 +196,15 @@ public class InlineTableControllerW implements InlineTableController {
 	}
 
 	@Override
-	public void setWidth(int width) {
+	public void setWidth(double width) {
 		style.setWidth(width, Style.Unit.PX);
+		tableImpl.setWidth(width);
 	}
 
 	@Override
-	public void setHeight(int height) {
+	public void setHeight(double height) {
 		style.setHeight(height, Style.Unit.PX);
+		tableImpl.setHeight(height);
 	}
 
 	@Override
@@ -167,6 +216,19 @@ public class InlineTableControllerW implements InlineTableController {
 	public void removeFromDom() {
 		if (tableElement != null) {
 			tableElement.removeFromParent();
+		}
+	}
+
+	private void updateSizes() {
+		int width = tableImpl.getTotalWidth();
+		int height = tableImpl.getTotalHeight();
+
+		if (width < 1 || height < 1) {
+			table.remove();
+		} else {
+			table.setWidth(tableImpl.getTotalWidth());
+			table.setHeight(tableImpl.getTotalHeight());
+			table.updateRepaint();
 		}
 	}
 

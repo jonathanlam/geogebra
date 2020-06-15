@@ -2090,6 +2090,7 @@ public abstract class EuclidianView implements EuclidianViewInterfaceCommon,
 		}
 
 		allDrawableList.remove(d);
+		resetBoundingBoxes();
 
 		if (d instanceof RemoveNeeded) {
 			((RemoveNeeded) d).remove();

@@ -1,6 +1,7 @@
 package org.geogebra.web.full.gui;
 
 import org.geogebra.common.awt.GAffineTransform;
+import org.geogebra.common.awt.GColor;
 import org.geogebra.common.awt.GGraphics2D;
 import org.geogebra.common.euclidian.inline.InlineTableController;
 
@@ -18,12 +19,12 @@ public class InlineTableControllerMock implements InlineTableController {
 	}
 
 	@Override
-	public void setWidth(int width) {
+	public void setWidth(double width) {
 
 	}
 
 	@Override
-	public void setHeight(int height) {
+	public void setHeight(double height) {
 
 	}
 
@@ -64,6 +65,46 @@ public class InlineTableControllerMock implements InlineTableController {
 
 	@Override
 	public void updateContent() {
+
+	}
+
+	@Override
+	public void setBackgroundColor(GColor bgColor) {
+
+	}
+
+	@Override
+	public String urlByCoordinate(int x, int y) {
+		return null;
+	}
+
+	@Override
+	public void insertRowAbove() {
+
+	}
+
+	@Override
+	public void insertRowBelow() {
+
+	}
+
+	@Override
+	public void insertColumnLeft() {
+
+	}
+
+	@Override
+	public void insertColumnRight() {
+
+	}
+
+	@Override
+	public void removeRow() {
+
+	}
+
+	@Override
+	public void removeColumn() {
 
 	}
 

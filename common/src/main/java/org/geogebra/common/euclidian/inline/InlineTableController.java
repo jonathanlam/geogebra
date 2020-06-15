@@ -1,6 +1,7 @@
 package org.geogebra.common.euclidian.inline;
 
 import org.geogebra.common.awt.GAffineTransform;
+import org.geogebra.common.awt.GColor;
 import org.geogebra.common.awt.GGraphics2D;
 import org.geogebra.common.euclidian.draw.HasTextFormat;
 
@@ -19,14 +20,14 @@ public interface InlineTableController extends HasTextFormat {
 	 *
 	 * @param width width
 	 */
-	void setWidth(int width);
+	void setWidth(double width);
 
 	/**
 	 * Set the height of the editor.
 	 *
 	 * @param height height
 	 */
-	void setHeight(int height);
+	void setHeight(double height);
 
 	void setAngle(double angle);
 
@@ -43,4 +44,20 @@ public interface InlineTableController extends HasTextFormat {
 	void toBackground();
 
 	void updateContent();
+
+	void setBackgroundColor(GColor bgColor);
+
+	String urlByCoordinate(int x, int y);
+
+	void insertRowAbove();
+
+	void insertRowBelow();
+
+	void insertColumnLeft();
+
+	void insertColumnRight();
+
+	void removeRow();
+
+	void removeColumn();
 }

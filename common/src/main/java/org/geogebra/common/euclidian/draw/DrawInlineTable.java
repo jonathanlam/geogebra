@@ -1,9 +1,13 @@
 package org.geogebra.common.euclidian.draw;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.geogebra.common.awt.GGraphics2D;
 import org.geogebra.common.awt.GPoint2D;
 import org.geogebra.common.awt.GRectangle;
 import org.geogebra.common.euclidian.Drawable;
+import org.geogebra.common.euclidian.EuclidianBoundingBoxHandler;
 import org.geogebra.common.euclidian.EuclidianView;
 import org.geogebra.common.euclidian.RotatableBoundingBox;
 import org.geogebra.common.euclidian.inline.InlineTableController;
@@ -64,6 +68,31 @@ public class DrawInlineTable extends Drawable implements DrawInline {
 	}
 
 	@Override
+	public String urlByCoordinate(int x, int y) {
+		if (tableController != null) {
+			GPoint2D p = rectangle.getInversePoint(x, y);
+			return tableController.urlByCoordinate((int) p.getX(), (int) p.getY());
+		}
+
+		return "";
+	}
+
+	@Override
+	public void updateByBoundingBoxResize(GPoint2D point, EuclidianBoundingBoxHandler handler) {
+		rectangle.updateByBoundingBoxResize(point, handler);
+	}
+
+	@Override
+	public void fromPoints(ArrayList<GPoint2D> points) {
+		rectangle.fromPoints(points);
+	}
+
+	@Override
+	protected List<GPoint2D> toPoints() {
+		return rectangle.toPoints();
+	}
+
+	@Override
 	public GeoElement getGeoElement() {
 		return geo;
 	}
@@ -105,7 +134,7 @@ public class DrawInlineTable extends Drawable implements DrawInline {
 
 	/**
 	 * For tests
-	 * @param tableController
+	 * @param tableController mock controller
 	 */
 	public void setTextController(InlineTableController tableController) {
 		this.tableController = tableController;

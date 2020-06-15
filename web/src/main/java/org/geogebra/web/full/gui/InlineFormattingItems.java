@@ -95,16 +95,19 @@ public class InlineFormattingItems {
 	}
 
 	private void addTableItems() {
-		addItem("ContextMenu.insertRowAbove", () -> {});
-		addItem("ContextMenu.insertRowBelow", () -> {});
-		addItem("ContextMenu.insertColumnLeft", () -> {});
-		addItem("ContextMenu.insertColumnRight", () -> {});
+		final GeoInlineTable table = (GeoInlineTable) geos.get(0);
+		final InlineTableController controller = table.getFormatter();
+
+		addItem("ContextMenu.insertRowAbove", controller::insertRowAbove);
+		addItem("ContextMenu.insertRowBelow", controller::insertRowBelow);
+		addItem("ContextMenu.insertColumnLeft", controller::insertColumnLeft);
+		addItem("ContextMenu.insertColumnRight", controller::insertColumnRight);
 
 		menu.addSeparator();
 
-		addItem("ContextMenu.deleteRow", () -> {});
-		addItem("ContextMenu.deleteColumn", () -> {});
-		addItem("ContextMenu.deleteTable", () -> {});
+		addItem("ContextMenu.deleteRow", controller::removeRow);
+		addItem("ContextMenu.deleteColumn", controller::removeColumn);
+		addItem("ContextMenu.deleteTable", table::remove);
 	}
 
 	private void addToolbar() {
