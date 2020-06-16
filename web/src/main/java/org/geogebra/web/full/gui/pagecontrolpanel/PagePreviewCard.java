@@ -130,7 +130,7 @@ public class PagePreviewCard extends FlowPanel
 
 	private void updateLabel() {
 		titlePanel.setMainTitle(loc.getMenu("page") + " " + (pageIndex + 1));
-		titlePanel.setSubTitle("Optional Name");
+		titlePanel.setSubTitle(pageIndex % 2 == 0 ? "Optional Name" : "");
 	}
 
 	/**
