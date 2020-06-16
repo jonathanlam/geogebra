@@ -10,7 +10,9 @@ public class PreviewTitlePanel extends FlowPanel {
 	public PreviewTitlePanel() {
 		FlowPanel titles = new FlowPanel();
 		mainTitle = new Label();
+		mainTitle.setStyleName("mainTitle");
 		subTitle = new Label();
+		subTitle.setStyleName("subTitle");
 		titles.add(mainTitle);
 		titles.add(subTitle);
 		add(titles);
