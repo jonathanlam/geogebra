@@ -23,7 +23,7 @@ public class PreviewTitlePanel extends FlowPanel {
 		mainTitle.setText(title);
 	}
 
-	public void setSubTitle(String title) {
+	public void setSubtitle(String title) {
 		subTitle.setText(title);
 	}
 

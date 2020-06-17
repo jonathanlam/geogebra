@@ -369,9 +369,14 @@ public class PageListController implements PageListControllerInterface,
 			JSONArray pages = response.getJSONArray("chapters").getJSONObject(0)
 					.getJSONArray("pages");
 			for (int i = 0; i < pages.length(); i++) {
-				slides.add(new PagePreviewCard(app, i, filter(archive,
-						pages.getJSONObject(i).getJSONArray("elements")
-								.getJSONObject(0).getString("id"))));
+				JSONObject elements = pages.getJSONObject(i).getJSONArray("elements")
+						.getJSONObject(0);
+				PagePreviewCard card = new PagePreviewCard(app, i, filter(archive,
+						elements.getString("id")));
+				if (elements.has("subtitle")) {
+					card.setSubtitle(elements.getString("subtitle"));
+				}
+				slides.add(card);
 			}
 			app.loadFileWithoutErrorHandling(slides.get(0).getFile(), false);
 			/// TODO this breaks MVC
