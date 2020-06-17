@@ -335,4 +335,8 @@ public class PagePreviewCard extends FlowPanel
 			removeStyleName("dragCanStart");
 		}
 	}
+
+	public String getSubtitle() {
+		return titlePanel.getSubtitle();
+	}
 }

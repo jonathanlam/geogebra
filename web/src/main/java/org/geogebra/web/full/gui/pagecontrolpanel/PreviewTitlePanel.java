@@ -26,4 +26,8 @@ public class PreviewTitlePanel extends FlowPanel {
 	public void setSubTitle(String title) {
 		subTitle.setText(title);
 	}
+
+	public String getSubtitle() {
+		return subTitle.getText();
+	}
 }

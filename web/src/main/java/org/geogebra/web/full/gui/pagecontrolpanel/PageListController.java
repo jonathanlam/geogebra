@@ -14,6 +14,7 @@ import org.geogebra.common.move.ggtapi.models.json.JSONTokener;
 import org.geogebra.common.plugin.Event;
 import org.geogebra.common.plugin.EventListener;
 import org.geogebra.common.plugin.EventType;
+import org.geogebra.common.util.StringUtil;
 import org.geogebra.common.util.debug.Log;
 import org.geogebra.web.full.gui.pagecontrolpanel.DragController.Cards;
 import org.geogebra.web.full.main.AppWFull;
@@ -329,8 +330,12 @@ public class PageListController implements PageListControllerInterface,
 
 			for (int i = 0; i < slides.size(); i++) {
 				JSONArray elements = new JSONArray();
-				elements.put(
-						new JSONObject().put("id", GgbFile.SLIDE_PREFIX + i));
+				JSONObject slideInfo = new JSONObject();
+				slideInfo.put("id", GgbFile.SLIDE_PREFIX + i);
+				if (hasSubtitle(i)) {
+					slideInfo.put("subtitle", getSubtitle(i));
+				}
+				elements.put(slideInfo);
 				pages.put(new JSONObject().put("elements", elements));
 			}
 
@@ -341,6 +346,14 @@ public class PageListController implements PageListControllerInterface,
 			Log.warn("can't save slides:" + e.getMessage());
 		}
 		return "{}";
+	}
+
+	private String getSubtitle(int index) {
+		return slides.get(index).getSubtitle();
+	}
+
+	private boolean hasSubtitle(int index) {
+		return !StringUtil.empty(slides.get(index).getSubtitle());
 	}
 
 	@Override
