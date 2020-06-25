@@ -323,7 +323,12 @@ public class CopyPasteW extends CopyPaste {
 	}-*/;
 
 	@Override
-	public native void pasteFromXML(App app)  /*-{
+	public void pasteFromXML(final App app) {
+		paste(app, text -> pasteText((AppW) app, text));
+	}
+
+	@Override
+	public native void paste(App app, AsyncOperation<String> callback) /*-{
 		function storageFallback() {
 			var stored = $wnd.localStorage
 				.getItem(@org.geogebra.web.html5.util.CopyPasteW::pastePrefix);
@@ -353,7 +358,7 @@ public class CopyPasteW extends CopyPaste {
 								} else if (data[i].types[j] === 'text/plain'
 										|| data[i].types[j] === 'text/uri-list') {
 									data[i].getType(data[i].types[j]).then(function(item) {
-										@org.geogebra.web.html5.util.CopyPasteW::readBlob(*)(item, app);
+										@org.geogebra.web.html5.util.CopyPasteW::readBlob(*)(item, app, callback);
 									});
 									return;
 								}
@@ -613,13 +618,13 @@ public class CopyPasteW extends CopyPaste {
 	}
 
 	@ExternalAccess
-	private static void readBlob(Blob blob, AppW app) {
+	private static void readBlob(Blob blob, AppW app, AsyncOperation<String> callback) {
 		// in Chrome one could use blob.text().then(callback)
 		// but the FileReader code is also compatible with Safari 13.1
 		FileReader reader = new FileReader();
 		reader.addEventListener("loadend", evt -> {
 			if (reader.result != null) {
-				pasteText(app, reader.result.asString());
+				callback.callback(reader.result.asString());
 			}
 		});
 		reader.readAsText(blob);

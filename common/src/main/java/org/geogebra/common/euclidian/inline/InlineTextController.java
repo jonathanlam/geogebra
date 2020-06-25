@@ -115,4 +115,8 @@ public interface InlineTextController {
 	String getListStyle();
 
 	String urlByCoordinate(int x, int y);
+
+	boolean copySelection();
+
+	void setSelectionText(String text);
 }
