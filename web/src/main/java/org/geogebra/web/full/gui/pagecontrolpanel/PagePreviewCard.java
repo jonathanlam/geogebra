@@ -3,6 +3,7 @@ package org.geogebra.web.full.gui.pagecontrolpanel;
 import org.geogebra.common.gui.SetLabels;
 import org.geogebra.common.main.Localization;
 import org.geogebra.common.util.StringUtil;
+import org.geogebra.web.full.gui.openfileview.CardInfoPanel;
 import org.geogebra.web.html5.Browser;
 import org.geogebra.web.html5.euclidian.EuclidianViewWInterface;
 import org.geogebra.web.html5.main.AppW;
@@ -10,6 +11,7 @@ import org.geogebra.web.html5.main.GgbFile;
 
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Label;
 
 /**
  * Page Preview Card showing preview of EuclidianView
@@ -33,14 +35,15 @@ public class PagePreviewCard extends FlowPanel
 	private int pageIndex;
 	private FlowPanel imagePanel;
 	private String image;
-	private PreviewTitlePanel titlePanel;
+	private Label title;
+	private Label subtitle;
 	private ContextMenuButtonPreviewCard contextMenu;
 	private int grabY; // where the user grabbed the card when dragging.
 	/**
 	 * ggb file
 	 */
 	protected GgbFile file;
-	
+
 	/**
 	 * @param app
 	 *            parent application
@@ -82,12 +85,15 @@ public class PagePreviewCard extends FlowPanel
 		imagePanel = new FlowPanel();
 		imagePanel.addStyleName("mowImagePanel");
 
-		titlePanel = new PreviewTitlePanel();
+		title = new Label();
+		subtitle = new Label();
+		CardInfoPanel cardInfoPanel = new CardInfoPanel(title, subtitle);
 		contextMenu = new ContextMenuButtonPreviewCard(app, this);
-		titlePanel.add(contextMenu);
+		cardInfoPanel.add(contextMenu);
 
 		add(imagePanel);
-		add(titlePanel);
+		add(cardInfoPanel);
+
 		if (StringUtil.empty(image)) {
 			updatePreviewImage();
 		} else {
@@ -129,7 +135,7 @@ public class PagePreviewCard extends FlowPanel
 	}
 
 	private void updateLabel() {
-		titlePanel.setMainTitle(loc.getMenu("page") + " " + (pageIndex + 1));
+		title.setText(loc.getMenu("page") + " " + (pageIndex + 1));
 	}
 
 	/**
@@ -336,10 +342,10 @@ public class PagePreviewCard extends FlowPanel
 	}
 
 	public String getSubtitle() {
-		return titlePanel.getSubtitle();
+		return subtitle.getText();
 	}
 
-	public void setSubtitle(String subtitle) {
-		titlePanel.setSubtitle(subtitle);
+	public void setSubtitle(String text) {
+		subtitle.setText(text);
 	}
 }

@@ -1,0 +1,37 @@
+.GeoGebraFrame {
+	// @extend only: not for direct use.
+	.cardInfoTemplate {
+		width: 100%;
+		height: 44px;
+		border-radius: 0 0 2px 2px;
+		background-color: $mow_card_background;
+		box-sizing: border-box;
+		display: flex;
+
+		.cardTitle {
+			line-height: 28px;
+			font-size: 100%;
+			height: 28px;
+			width: 154px;
+			padding: 8px 30px 8px 16px;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+			overflow: hidden;
+			display: block;
+			color: $text-primary;
+		}
+
+		.mowMoreButton {
+			width: 24px;
+			height: 24px;
+			padding: 10px 6px 10px 10px;
+			position: relative;
+			opacity: 0.54;
+			cursor: pointer;
+
+			&.gwt-ToggleButton-up-hovering {
+				opacity: 1;
+			}
+		}
+	}
+}
