@@ -26,6 +26,7 @@ public class MaterialCard extends FlowPanel implements MaterialCardI {
 	private FlowPanel imgPanel;
 	// material information
 	private FlowPanel infoPanel;
+	private CardInfoPanel cardInfoPanel;
 	private Label cardTitle;
 	private Label cardAuthor;
 	private ContextMenuButtonMaterialCard moreBtn;
@@ -66,29 +67,28 @@ public class MaterialCard extends FlowPanel implements MaterialCardI {
 		setBackgroundImgPanel(getMaterial());
 		this.add(imgPanel);
 		// panel containing the info regarding the material
-		infoPanel = new FlowPanel();
-		infoPanel.setStyleName("cardInfoPanel");
+		createCardInfoPanel();
+	}
+
+	private void createCardInfoPanel() {
 		cardTitle = new Label(getMaterial().getTitle());
-		cardTitle.setStyleName("cardTitle");
 		cardAuthor = new Label("".equals(getMaterial().getAuthor())
 				&& getMaterial().getCreator() != null
 				? getMaterial().getCreator().getDisplayname()
 				: getMaterial().getAuthor());
-		cardAuthor.setStyleName("cardAuthor");
 		moreBtn = new ContextMenuButtonMaterialCard(app, getMaterial(), this);
 		// panel for visibility state
 		visibilityPanel = new FlowPanel();
-		visibilityPanel.setStyleName("visibilityPanel");
 		updateVisibility(getMaterial().getVisibility());
+		cardInfoPanel = new CardInfoPanel(cardTitle,
+				isOwnMaterial() ? visibilityPanel : cardAuthor);
+		visibilityPanel.setStyleName("visibilityPanel");
+		cardInfoPanel.add(moreBtn);
+		add(cardInfoPanel);
+	}
 
-		// build info panel
-		infoPanel.add(cardTitle);
-		infoPanel.add(
-				app.getLoginOperation().getGeoGebraTubeAPI().owns(getMaterial())
-						? visibilityPanel
-				: cardAuthor);
-		infoPanel.add(moreBtn);
-		this.add(infoPanel);
+	private boolean isOwnMaterial() {
+		return app.getLoginOperation().getGeoGebraTubeAPI().owns(getMaterial());
 	}
 
 	/**

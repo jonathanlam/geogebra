@@ -74,6 +74,7 @@ public class RenameInputHandler implements InputHandler {
 			app.storeUndoInfo();
 		}
 
+
 		callback.callback(true);
 
 	}
