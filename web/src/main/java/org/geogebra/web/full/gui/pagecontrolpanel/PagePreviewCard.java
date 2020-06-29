@@ -130,7 +130,6 @@ public class PagePreviewCard extends FlowPanel
 
 	private void updateLabel() {
 		titlePanel.setMainTitle(loc.getMenu("page") + " " + (pageIndex + 1));
-		titlePanel.setSubTitle(pageIndex % 2 == 0 ? "Optional Name" : "");
 	}
 
 	/**
@@ -334,5 +333,13 @@ public class PagePreviewCard extends FlowPanel
 		} else {
 			removeStyleName("dragCanStart");
 		}
+	}
+
+	public String getSubtitle() {
+		return titlePanel.getSubtitle();
+	}
+
+	public void setSubtitle(String subtitle) {
+		titlePanel.setSubtitle(subtitle);
 	}
 }
