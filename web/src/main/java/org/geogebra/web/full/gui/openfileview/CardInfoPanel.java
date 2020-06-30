@@ -17,4 +17,8 @@ public class CardInfoPanel extends FlowPanel {
 		setStyleName("cardInfoPanel");
 		title.setStyleName("cardTitle");
 	}
+
+	public void setRowStyle(String style) {
+		row.setStyleName(style);
+	}
 }

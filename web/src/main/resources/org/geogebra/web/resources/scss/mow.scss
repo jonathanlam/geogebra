@@ -1,4 +1,5 @@
 @import 'colors';
+@import 'cardInfo';
 
 .GeoGebraFrame{
 	$pagecontrolpanelWidth: 269px;
@@ -309,6 +310,7 @@
 		.mowPageControlScrollPanel.noVerticalScrollbar {
 			overflow-y: hidden;
 		}
+
 		.mowPageControlContentPanel {
 			width: 100%;
 			height: 100%;
@@ -362,48 +364,10 @@
 			background-size: 110%;
 			cursor: pointer;
 		}
-		.mowTitlePanel {
-			width: 100%;
-			border-radius: 0 0 2px 2px;
-			background-color: $mow_card_background;
-			box-sizing: border-box;
-			display: flex;
-			padding: 8px 46px 8px 16px;
-			.title {
-				padding-bottom: 8px;
-				line-height: 1;
-				text-overflow: ellipsis;
-    			white-space: nowrap;
- 				overflow: hidden;
- 				display: block;
- 				color: $text-primary;
- 				font-size: 16px;
-				cursor: default;
-			}
-			.subTitle {
-				padding-bottom: 0;
-				color: $text-secondary;
- 				font-size: 14px;
- 				min-height: 16px;
-			}
 
-
-			.mowMoreButton {
-				width: 24px;
-				height: 24px;
-				padding: 8px 8px 8px 8px;
-				right: 16px;
-			    position: absolute;
-				opacity: 0.54;
-				cursor: pointer;
-
-				&:hover {
-					opacity: 0.85;
-				}
-			}
-			.mowMoreButton.active {
-					opacity: 1;
-				}
+		.cardInfoPanel {
+			@extend .cardInfoTemplate;
+			height: 88px;
 		}
 	}
 		.mowPagePreviewCard.selected {

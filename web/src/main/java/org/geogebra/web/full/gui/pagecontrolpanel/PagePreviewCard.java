@@ -90,6 +90,8 @@ public class PagePreviewCard extends FlowPanel
 		CardInfoPanel cardInfoPanel = new CardInfoPanel(title, subtitle);
 		contextMenu = new ContextMenuButtonPreviewCard(app, this);
 		cardInfoPanel.add(contextMenu);
+		cardInfoPanel.setRowStyle("subtitle");
+
 
 		add(imagePanel);
 		add(cardInfoPanel);
@@ -136,6 +138,7 @@ public class PagePreviewCard extends FlowPanel
 
 	private void updateLabel() {
 		title.setText(loc.getMenu("page") + " " + (pageIndex + 1));
+		subtitle.setText("Optional title");
 	}
 
 	/**
