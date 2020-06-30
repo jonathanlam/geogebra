@@ -15,6 +15,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.Widget;
 
 /**
  * 
@@ -32,6 +33,7 @@ public class MaterialCard extends FlowPanel implements MaterialCardI {
 	private ContextMenuButtonMaterialCard moreBtn;
 	private FlowPanel visibilityPanel;
 	private MaterialCardController controller;
+	private CardInfoPanel cardInfoPanel;
 
 	/**
 	 * @param m
@@ -70,31 +72,38 @@ public class MaterialCard extends FlowPanel implements MaterialCardI {
 		imgPanel = new FlowPanel();
 		imgPanel.setStyleName("cardImgPanel");
 		setBackgroundImgPanel(getMaterial());
-		this.add(imgPanel);
-		// panel containing the info regarding the material
-		infoPanel = new FlowPanel();
-		infoPanel.setStyleName("cardInfoPanel");
+		createCardInfoPanel();
+		add(imgPanel);
+		add(cardInfoPanel);
+	}
+
+	private void createCardInfoPanel() {
 		cardTitle = new Label(getMaterial().getTitle());
-		cardTitle.setStyleName("cardTitle");
+		moreBtn = new ContextMenuButtonMaterialCard(app, getMaterial(), this);
+		cardInfoPanel =
+				new CardInfoPanel(cardTitle, isOwnMaterial()
+						? getCardAuthor() : getVisibilityPanel());
+		cardInfoPanel.add(moreBtn);
+	}
+
+	private Widget getVisibilityPanel() {
+		visibilityPanel = new FlowPanel();
+		visibilityPanel.setStyleName("visibilityPanel");
+		updateVisibility(getMaterial().getVisibility());
+		return visibilityPanel;
+	}
+
+	private Widget getCardAuthor() {
 		cardAuthor = new Label("".equals(getMaterial().getAuthor())
 				&& getMaterial().getCreator() != null
 				? getMaterial().getCreator().getDisplayname()
 				: getMaterial().getAuthor());
 		cardAuthor.setStyleName("cardAuthor");
-		moreBtn = new ContextMenuButtonMaterialCard(app, getMaterial(), this);
-		// panel for visibility state
-		visibilityPanel = new FlowPanel();
-		visibilityPanel.setStyleName("visibilityPanel");
-		updateVisibility(getMaterial().getVisibility());
+		return cardAuthor;
+	}
 
-		// build info panel
-		infoPanel.add(cardTitle);
-		infoPanel.add(
-				app.getLoginOperation().getGeoGebraTubeAPI().owns(getMaterial())
-						? visibilityPanel
-				: cardAuthor);
-		infoPanel.add(moreBtn);
-		this.add(infoPanel);
+	private boolean isOwnMaterial() {
+		return app.getLoginOperation().getGeoGebraTubeAPI().owns(getMaterial());
 	}
 
 	/**
