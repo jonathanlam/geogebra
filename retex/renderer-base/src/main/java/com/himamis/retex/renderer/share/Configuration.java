@@ -1060,10 +1060,10 @@ public final class Configuration {
 		add("varobslash", TeXConstants.TYPE_BINARY_OPERATOR, 52,
 				fonts.stmary10);
 		add("nplus", TeXConstants.TYPE_BINARY_OPERATOR, 99, fonts.stmary10);
-		add("Upsilon", TeXConstants.TYPE_ORDINARY, 168, fonts.cmr10);
+		add("Upsilon", TeXConstants.TYPE_ORDINARY, 168, fonts.cmr10, '\u03A5');
 		add("ntrianglerighteqslant", TeXConstants.TYPE_RELATION, 115,
 				fonts.stmary10);
-		add("Phi", TeXConstants.TYPE_ORDINARY, 169, fonts.cmr10);
+		add("Phi", TeXConstants.TYPE_ORDINARY, 169, fonts.cmr10, '\u03A6');
 		add("curlyveedownarrow", TeXConstants.TYPE_RELATION, 78,
 				fonts.stmary10);
 		add("varcurlyvee", TeXConstants.TYPE_BINARY_OPERATOR, 40,
@@ -1081,14 +1081,14 @@ public final class Configuration {
 		add("llfloor", TeXConstants.TYPE_OPENING, 116, fonts.stmary10);
 		add("varcurlywedge", TeXConstants.TYPE_BINARY_OPERATOR, 41,
 				fonts.stmary10);
-		add("Omega", TeXConstants.TYPE_ORDINARY, 173, fonts.cmr10);
+		add("Omega", TeXConstants.TYPE_ORDINARY, 173, fonts.cmr10, '\u03A9');
 		add("oblong", TeXConstants.TYPE_BINARY_OPERATOR, 96, fonts.stmary10);
 		add("land", TeXConstants.TYPE_BINARY_OPERATOR, 94, fonts.cmsy10);
 		add("fatsemi", TeXConstants.TYPE_BINARY_OPERATOR, 67, fonts.stmary10);
 		add("subsetpluseq", TeXConstants.TYPE_RELATION, 102, fonts.stmary10);
 		add("varoslash", TeXConstants.TYPE_BINARY_OPERATOR, 51, fonts.stmary10);
 		add("merge", TeXConstants.TYPE_BINARY_OPERATOR, 65, fonts.stmary10);
-		add("Pi", TeXConstants.TYPE_ORDINARY, 166, fonts.cmr10);
+		add("Pi", TeXConstants.TYPE_ORDINARY, 166, fonts.cmr10, '\u03A0');
 		add("leq", TeXConstants.TYPE_RELATION, 183, fonts.cmsy10, '\u2264');
 		add("obslash", TeXConstants.TYPE_BINARY_OPERATOR, 91, fonts.stmary10);
 		add("varoplus", TeXConstants.TYPE_BINARY_OPERATOR, 54, fonts.stmary10);

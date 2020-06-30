@@ -6,6 +6,7 @@ import org.geogebra.common.plugin.Operation;
 
 import com.himamis.retex.editor.share.editor.SyntaxAdapter;
 import com.himamis.retex.renderer.share.TeXFormula;
+import com.himamis.retex.renderer.share.platform.FactoryProvider;
 import com.himamis.retex.renderer.share.serialize.TeXAtomSerializer;
 
 /**
@@ -34,6 +35,15 @@ public class SyntaxAdapterImpl implements SyntaxAdapter {
 		try {
 			kernel.getAlgebraProcessor()
 					.getValidExpressionNoExceptionHandling(expression);
+			String[] parts = expression.split("\\\\");
+			// a\b is set difference: allow it
+			for (int i = 1; i< parts.length; i++) {
+				String command = parts[i].contains(" ") ?
+						parts[i].substring(0, parts[i].indexOf(' ')) : parts[i];
+				if (kernel.lookupLabel(command) == null) {
+					return true;
+				}
+			}
 			// parses OK as GGB, not LaTeX
 			return false;
 		} catch (Throwable e) {
@@ -68,6 +78,8 @@ public class SyntaxAdapterImpl implements SyntaxAdapter {
 			return convertMathMLoGGB(exp);
 
 		} else if (mightBeLaTeXSyntax(exp)) {
+
+			FactoryProvider.debugS("LATEX");
 			return convertLaTeXtoGGB(exp);
 		}
 

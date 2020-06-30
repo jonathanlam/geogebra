@@ -47,12 +47,8 @@ public class TeXAtomSerializer {
 	 * @return expression in GeoGebra syntax
 	 */
 	public String serialize(Atom root) {
-
-		// FactoryProvider.debugS("root = " + root.getClass());
 		if (root instanceof FractionAtom) {
-			FractionAtom frac = (FractionAtom) root;
-			return "(" + serialize(frac.getNumerator()) + ")/("
-					+ serialize(frac.getDenominator()) + ")";
+			return serializeFractionAtom((FractionAtom) root);
 		}
 		if (root instanceof NthRoot) {
 			NthRoot nRoot = (NthRoot) root;
@@ -171,9 +167,7 @@ public class TeXAtomSerializer {
 		}
 
 		if (root instanceof BigOperatorAtom) {
-			BigOperatorAtom bigOp = (BigOperatorAtom) root;
-			return serialize(bigOp.getTrueBase()) + " from " + serialize(bigOp.getBottom()) + " to "
-					+ serialize(bigOp.getTop());
+			return serializeBigOperator((BigOperatorAtom) root);
 		}
 		
 		// BoldAtom, ItAtom, TextStyleAtom, StyleAtom, RomanAtom
@@ -187,6 +181,29 @@ public class TeXAtomSerializer {
 		// FactoryProvider.getInstance().printStacktrace();
 
 		return "?";
+	}
+
+	private String serializeFractionAtom(FractionAtom frac) {
+		if (frac.getRuleThickness() == 0) {
+			// \binom not \frac
+			return "nCr(" + serialize(frac.getNumerator()) + ","
+					+ serialize(frac.getDenominator()) + ")";
+		}
+		return "(" + serialize(frac.getNumerator()) + ")/("
+				+ serialize(frac.getDenominator()) + ")";
+	}
+
+	private String serializeBigOperator(BigOperatorAtom bigOp) {
+
+		String op = serialize(bigOp.getTrueBase());
+
+		if ("log".equals(op)) {
+			return "log_" + serialize(bigOp.getBottom());
+		}
+
+		// eg sum/product
+		return serialize(bigOp.getTrueBase()) + " from " + serialize(bigOp.getBottom()) + " to "
+				+ serialize(bigOp.getTop());
 	}
 
 	private String subSup(ScriptsAtom script) {

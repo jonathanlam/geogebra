@@ -1190,4 +1190,5 @@ public class MathFieldW implements MathField, IsWidget, MathFieldAsync, BlurHand
 	public void setMinHeight(int minHeight) {
 		this.minHeight = minHeight;
 	}
+
 }

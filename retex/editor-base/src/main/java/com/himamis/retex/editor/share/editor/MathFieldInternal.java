@@ -698,6 +698,7 @@ public class MathFieldInternal
 		reverse(path);
 
 		if (listener != null) {
+			setFormula(GeoGebraSerializer.reparse(getFormula()));
 			listener.onInsertString();
 		}
 		getMathFieldController().setSelectedPath(getFormula(), path,

@@ -48,23 +48,23 @@ public class GgbApiTest {
 	public void testCaption() {
 		api.evalCommand("b=1");
 		api.evalCommand("SetCaption[b,\"%n rocks\"]");
-		assertEquals(api.getCaption("b", false), "%n rocks");
-		assertEquals(api.getCaption("b", true), "b rocks");
+		assertThat(api.getCaption("b", false), is("%n rocks"));
+		assertThat(api.getCaption("b", true), is("b rocks"));
 	}
 
 	@Test
 	public void testEvalMathML() {
 		api.evalMathML(
 				"<mrow><mi> x</mi><mo> +</mo><mrow><mi> 1</mi><mo>/</mo><mi> 2</mi></mrow></mrow>");
-		assertEquals(api.getLaTeXString("f"), "x + \\frac{1}{2}");
-		assertEquals(api.getValueString("f", true), "f(x) = x + 1 / 2");
+		assertThat(api.getLaTeXString("f"), is("x + \\frac{1}{2}"));
+		assertThat(api.getValueString("f", true), is("f(x) = x + 1 / 2"));
 	}
 
 	@Test
 	public void testEvalLaTeX() {
 		api.evalLaTeX("latex(x)=\\sqrt{x}", 0);
-		assertEquals(api.getLaTeXString("latex"), "\\sqrt{x}");
-		assertEquals(api.getValueString("latex", true), "latex(x) = sqrt(x)");
+		assertThat(api.getLaTeXString("latex"), is("\\sqrt{x}"));
+		assertThat(api.getValueString("latex", true), is("latex(x) = sqrt(x)"));
 	}
 
 	@Test

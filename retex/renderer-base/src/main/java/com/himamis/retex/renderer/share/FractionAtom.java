@@ -71,8 +71,6 @@ public class FractionAtom extends Atom {
 	 *            the numerator
 	 * @param den
 	 *            the denominator
-	 * @param unit
-	 *            a unit constant for the line thickness
 	 * @param t
 	 *            the thickness of the fraction line (in the given unit)
 	 * @param numAlign
@@ -101,6 +99,10 @@ public class FractionAtom extends Atom {
 	public FractionAtom(Atom num, Atom den) {
 		this(num, den, null, TeXConstants.Align.CENTER,
 				TeXConstants.Align.CENTER);
+	}
+
+	public int getRuleThickness() {
+		return thickness == null || thickness.getL() == 0 ? 0 : 1;
 	}
 
 	/**

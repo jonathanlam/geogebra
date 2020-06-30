@@ -28,7 +28,6 @@ public class KeyboardInputAdapter {
         adapters.add(new FunctionsAdapter());
         adapters.add(new StringCharAdapter(times, '*'));
         adapters.add(new StringCharAdapter(minus, '-'));
-        adapters.add(new FunctionAdapter("|", "abs"));
         adapters.add(new FunctionAdapter("random"));
         adapters.add(new FunctionAdapter("nroot"));
 		adapters.add(new StringInput(Unicode.SUPERSCRIPT_2 + "") {
