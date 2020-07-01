@@ -1112,7 +1112,7 @@ public final class Configuration {
 		add("hbar", TeXConstants.TYPE_ORDINARY, 126, fonts.msbm10);
 		add("lneqq", TeXConstants.TYPE_RELATION, 169, fonts.msbm10);
 		add("Psi", TeXConstants.TYPE_ORDINARY, 170, fonts.cmr10, '\u03A8');
-		add("Theta", TeXConstants.TYPE_ORDINARY, 163, fonts.cmr10, '\u03F4');
+		add("Theta", TeXConstants.TYPE_ORDINARY, 163, fonts.cmr10, '\u0398');
 		add("doubleacute", TeXConstants.TYPE_ACCENT, 125, fonts.cmr10);
 		add("varsubsetneqq", TeXConstants.TYPE_RELATION, 38, fonts.msbm10,
 				'\ue2b8');

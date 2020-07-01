@@ -184,7 +184,7 @@ public class TeXAtomSerializer {
 	}
 
 	private String serializeFractionAtom(FractionAtom frac) {
-		if (frac.getRuleThickness() == 0) {
+		if (frac.isRuleHidden()) {
 			// \binom not \frac
 			return "nCr(" + serialize(frac.getNumerator()) + ","
 					+ serialize(frac.getDenominator()) + ")";

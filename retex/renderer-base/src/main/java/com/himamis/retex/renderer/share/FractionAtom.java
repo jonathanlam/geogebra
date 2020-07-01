@@ -101,8 +101,9 @@ public class FractionAtom extends Atom {
 				TeXConstants.Align.CENTER);
 	}
 
-	public int getRuleThickness() {
-		return thickness == null || thickness.getL() == 0 ? 0 : 1;
+	public boolean isRuleHidden() {
+		// null represents default non-zero thickness
+		return thickness != null && thickness.getL() == 0;
 	}
 
 	/**

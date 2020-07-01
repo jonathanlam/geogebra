@@ -37,9 +37,9 @@ public class SyntaxAdapterImpl implements SyntaxAdapter {
 					.getValidExpressionNoExceptionHandling(expression);
 			String[] parts = expression.split("\\\\");
 			// a\b is set difference: allow it
-			for (int i = 1; i< parts.length; i++) {
-				String command = parts[i].contains(" ") ?
-						parts[i].substring(0, parts[i].indexOf(' ')) : parts[i];
+			for (int i = 1; i < parts.length; i++) {
+				String command = parts[i].contains(" ")
+						? parts[i].substring(0, parts[i].indexOf(' ')) : parts[i];
 				if (kernel.lookupLabel(command) == null) {
 					return true;
 				}

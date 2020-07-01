@@ -7,6 +7,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.times;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -30,6 +31,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+
+import com.himamis.retex.editor.share.util.Greek;
 
 public class GgbApiTest {
 	private AppCommon app;
@@ -65,6 +68,44 @@ public class GgbApiTest {
 		api.evalLaTeX("latex(x)=\\sqrt{x}", 0);
 		assertThat(api.getLaTeXString("latex"), is("\\sqrt{x}"));
 		assertThat(api.getValueString("latex", true), is("latex(x) = sqrt(x)"));
+	}
+
+	@Test
+	public void testEvalLaTeXBinom() {
+		api.evalLaTeX("b=\\binom{10}{2}", 0);
+		assertThat(api.getLaTeXString("b"), is("45"));
+	}
+
+	@Test
+	public void testEvalLaTeXLog() {
+		api.evalLaTeX("l=\\log_5(25)", 0);
+		assertThat(api.getLaTeXString("l"), is("2"));
+	}
+
+	@Test
+	public void testEvalLaTeXGreek() {
+		List<String> set = Arrays.asList("Alpha", "Beta", "Epsilon", "Zeta", "Eta",
+				"Iota", "Kappa", "Mu", "Nu", "Omicron", "Rho", "Tau", "Chi",
+				"phi", "epsilon");
+		for (Greek letter: Greek.values()) {
+			if (!set.contains(letter.name())) {
+				assertLaTeXGreekEval(letter.name(), String.valueOf(letter.unicode));
+			}
+		}
+		assertLaTeXGreekEval("varphi", "\u03C6");
+		assertLaTeXGreekEval("varpi", "\u03D6");
+		assertLaTeXGreekEval("vartheta", "\u03D1");
+		assertLaTeXGreekEval("varepsilon", "\u03B5");
+		assertLaTeXGreekEval("varrho", "\u03F1");
+		assertLaTeXGreekEval("phi", "\u03D5");
+		assertLaTeXGreekEval("epsilon", "\u03F5");
+	}
+
+	private void assertLaTeXGreekEval(String latex, String unicode) {
+		api.newConstruction();
+		api.evalLaTeX("x\\" + latex + "=42", 0);
+		assertEquals(latex + " not parsed as " + unicode, "42",
+				api.getLaTeXString("x" + unicode));
 	}
 
 	@Test
