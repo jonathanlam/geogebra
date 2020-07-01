@@ -261,6 +261,7 @@ public class ContextMenuGeoElementW extends ContextMenuGeoElement
 				return true;
 			}
 		}
+
 		return false;
 	}
 

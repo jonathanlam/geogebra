@@ -13,12 +13,17 @@ import org.geogebra.web.full.gui.dialog.MaterialRenameDialog;
 import org.geogebra.web.full.gui.util.ContextMenuButtonCard;
 import org.geogebra.web.html5.main.AppW;
 import org.geogebra.web.shared.ShareDialogMow;
-import org.geogebra.web.shared.components.DialogData;
+
+import com.google.gwt.user.client.Command;
 
 /**
  * Context Menu of Material Cards
+ * 
+ * @author Alicia
+ *
  */
 public class ContextMenuButtonMaterialCard extends ContextMenuButtonCard {
+
 	private Material material;
 	private MaterialCardI card;
 
@@ -54,30 +59,49 @@ public class ContextMenuButtonMaterialCard extends ContextMenuButtonCard {
 
 	private void addShareItem() {
 		addItem(MaterialDesignResources.INSTANCE.share_black(),
-				loc.getMenu("Share"), this::onShare);
+				loc.getMenu("Share"), new Command() {
+					@Override
+					public void execute() {
+						onShare();
+					}
+				});
 	}
 
 	private void addRenameItem() {
 		addItem(MaterialDesignResources.INSTANCE.mow_rename(),
-				loc.getMenu("Rename"), this::onRename);
+				loc.getMenu("Rename"), new Command() {
+					@Override
+					public void execute() {
+						onRename();
+					}
+				});
 	}
 
 	private void addCopyItem() {
 		addItem(MaterialDesignResources.INSTANCE.copy_black(),
-				loc.getMenu("makeACopy"), this::onCopy);
+				loc.getMenu("makeACopy"), new Command() {
+					@Override
+					public void execute() {
+						onCopy();
+					}
+				});
 	}
 
 	private void addDeleteItem() {
 		addItem(MaterialDesignResources.INSTANCE.delete_black(),
-				loc.getMenu("Delete"), this::onDelete);
+				loc.getMenu("Delete"), new Command() {
+					@Override
+					public void execute() {
+						onDelete();
+					}
+				});
 	}
 
 	/**
 	 * execute share action
 	 */
 	protected void onShare() {
-		DialogData data = new DialogData("Share", "Cancel", "Save");
-		ShareDialogMow dialog = new ShareDialogMow(app, data,
+		ShareDialogMow dialog = new ShareDialogMow(app,
 				app.getCurrentURL(material.getSharingKey(), true), material);
 		dialog.setCallback(new MaterialCallbackI() {
 
@@ -108,10 +132,9 @@ public class ContextMenuButtonMaterialCard extends ContextMenuButtonCard {
 	 */
 	protected void onRename() {
 		hide();
-		DialogData data = new DialogData("rename.resource", "Cancel", "Rename");
 		MaterialRenameDialog renameDialog = new MaterialRenameDialog(
-				app, data, card);
-		renameDialog.show();
+				app.getPanel(), app, card);
+		renameDialog.center();
 	}
 
 	/**

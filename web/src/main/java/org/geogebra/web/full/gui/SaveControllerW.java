@@ -122,12 +122,15 @@ public class SaveControllerW implements SaveController {
 			final Material oldActiveMaterial = app.getActiveMaterial();
 			final String oldTitle = app.getKernel().getConstruction().getTitle();
 			ensureTypeOtherThan(Material.MaterialType.ggsTemplate);
-			setRunAfterSave(saved -> {
-				if (!saved) {
-					app.setActiveMaterial(oldActiveMaterial);
-					app.getKernel().getConstruction().setTitle(oldTitle);
+			setRunAfterSave(new AsyncOperation<Boolean>() {
+				@Override
+				public void callback(Boolean saved) {
+					if (!saved) {
+						app.setActiveMaterial(oldActiveMaterial);
+						app.getKernel().getConstruction().setTitle(oldTitle);
+					}
+					runnable.callback(saved);
 				}
-				runnable.callback(saved);
 			});
 			((DialogManagerW) app.getDialogManager()).getSaveDialog().showAndPosition(anchor);
 		} else {

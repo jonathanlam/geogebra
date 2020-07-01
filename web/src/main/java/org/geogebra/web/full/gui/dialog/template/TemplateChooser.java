@@ -1,28 +1,29 @@
 package org.geogebra.web.full.gui.dialog.template;
 
+import org.geogebra.common.main.Localization;
+import org.geogebra.web.full.gui.dialog.OptionDialog;
 import org.geogebra.web.html5.main.AppW;
-import org.geogebra.web.shared.components.ComponentDialog;
-import org.geogebra.web.shared.components.DialogData;
 
 import com.google.gwt.user.client.ui.FlowPanel;
 
-public class TemplateChooser extends ComponentDialog {
+public class TemplateChooser extends OptionDialog {
+    private Localization loc;
     private TemplateChooserController controller;
 
     /**
      * @param app see {@link AppW}
-     * @param data dialog transkeys
-     * @param controller template chooser controller
      */
-    public TemplateChooser(AppW app, DialogData data, TemplateChooserController controller) {
-        super(app, data, false, true);
+    public TemplateChooser(AppW app, TemplateChooserController controller) {
+        super(app.getPanel(), app);
+        loc = app.getLocalization();
         this.controller = controller;
-        this.addStyleName("templateChooser");
-        buildContent();
-        setOnPositiveAction(() -> controller.onCreate(app));
+        buildGUI();
+        setGlassEnabled(true);
     }
 
-    private void buildContent() {
+    private void buildGUI() {
+        this.getCaption().setText(loc.getMenu("New.Mebis"));
+        this.addStyleName("templateChooser");
         FlowPanel dialogContent = new FlowPanel();
         dialogContent.addStyleName("templateChooserContent");
         FlowPanel templatesPanel = new FlowPanel();
@@ -34,6 +35,21 @@ public class TemplateChooser extends ComponentDialog {
             templatesPanel.add(templateCard);
         }
         dialogContent.add(templatesPanel);
-        addDialogContent(dialogContent);
+        updateButtonLabels("Create");
+        dialogContent.add(getButtonPanel());
+        setPrimaryButtonEnabled(true);
+        this.add(dialogContent);
+    }
+
+    @Override
+    public void show() {
+        super.show();
+        super.center();
+    }
+
+    @Override
+    protected void processInput() {
+        hide();
+        controller.onCreate(app);
     }
 }

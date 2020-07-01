@@ -1,15 +1,13 @@
 package org.geogebra.web.shared;
 
 import org.geogebra.common.move.ggtapi.models.Material;
+import org.geogebra.web.html5.gui.laf.VendorSettings;
 import org.geogebra.web.html5.gui.tooltip.ToolTipManagerW;
 import org.geogebra.web.html5.gui.view.button.StandardButton;
 import org.geogebra.web.html5.main.AppW;
 import org.geogebra.web.resources.SVGResource;
-import org.geogebra.web.shared.components.ComponentDialog;
-import org.geogebra.web.shared.components.DialogData;
 
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -17,99 +15,124 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
- *   Share link dialog
+ * @author Alicia
+ *
+ *         get share link dialog
  */
-public class ShareLinkDialog extends ComponentDialog {
+public class ShareLinkDialog extends DialogBoxW {
+	private Label linkLabel;
 	/** textbox providing share url */
 	protected TextBox linkBox;
-
+	private StandardButton copyBtn;
+	private Label shareHelp;
+	private StandardButton printBtn;
+	private StandardButton embedBtn;
+	private StandardButton exportImgBtn;
+	private StandardButton cancelBtn;
+	// share link
+	private String shareURL;
 	/** parent widget */
 	protected Widget anchor;
 
 	/**
-	 * @param app application
-	 * @param data dialog tanskeys
-	 * @param shareURL sharing url of material
-	 * @param anchor parent widget
+	 * @param app
+	 *            application
+	 * @param shareURL
+	 *            sharing url of material
+	 * @param anchor
+	 *            parent widget
 	 */
-	public ShareLinkDialog(AppW app, DialogData data, String shareURL, Widget anchor) {
-		super(app, data, true, false);
+	public ShareLinkDialog(AppW app, String shareURL, Widget anchor) {
+		super(false, true, null, app.getPanel(), app);
+		setStyleName("MaterialDialogBox"); // even in classic
 		this.app = app;
+		this.shareURL = shareURL;
 		this.anchor = anchor;
-		addStyleName(app.getVendorSettings().getStyleName("shareLink"));
-		buildContent(shareURL);
+		initGui();
 		DialogUtil.hideOnLogout(app, this);
 	}
 
-	private void buildContent(String shareURL) {
+	private void initGui() {
+		VendorSettings vendorSettings = ((AppW) app).getVendorSettings();
+		addStyleName(vendorSettings.getStyleName("shareLink"));
+		setAutoHideEnabled(true);
+		setGlassEnabled(false);
 		addCloseHandler(event -> {
 			if (anchor != null) {
 				anchor.removeStyleName("selected");
 			}
 		});
-
+		// panel with link text field
 		FlowPanel linkPanel = new FlowPanel();
 		linkPanel.setStyleName("linkPanel");
-		Label linkLabel = new Label(localize("Link"));
+		linkLabel = new Label();
 		linkLabel.setStyleName("linkLabel");
 		linkBox = new TextBox();
 		linkBox.setReadOnly(true);
-		linkBox.setText(shareURL);
+		linkBox.setText(this.shareURL);
 		linkBox.setStyleName("linkBox");
 		addLinkBoxHandlers();
-
-		StandardButton copyBtn = new StandardButton(localize("Copy"),
+		// build and add copy button
+		copyBtn = new StandardButton(localize("Copy"),
 				app);
 		copyBtn.setStyleName("copyButton");
-
-		copyBtn.addFastClickHandler(source -> {
-			app.copyTextToSystemClipboard(linkBox.getText());
-			hide();
-		});
-
-		FlowPanel contentPanel = new FlowPanel();
-		contentPanel.add(linkLabel);
+		FlowPanel mainPanel = new FlowPanel();
+		mainPanel.add(linkLabel);
 		linkPanel.add(linkBox);
 		linkPanel.add(copyBtn);
-		contentPanel.add(linkPanel);
-
-		Label shareHelp = new Label(localize(((AppW) app).getVendorSettings()
-				.getMenuLocalizationKey("SharedLinkHelpTxt")));
+		mainPanel.add(linkPanel);
+		// share help text
+		shareHelp = new Label();
 		shareHelp.addStyleName("shareHelpTxt");
-
+		if (app.isMebis()) {
+			mainPanel.add(shareHelp);
+		}
 		// build button panel (print prev, export img)
 		// button panel
-
 		FlowPanel buttonPanel = new FlowPanel();
 		buttonPanel.setStyleName("buttonPanel");
 
-		StandardButton printBtn = roundButton(
+		printBtn = roundButton(
 				SharedResources.INSTANCE.print_white(), "Print");
 		printBtn.addFastClickHandler(source -> {
 			app.getDialogManager().showPrintPreview();
 			hide();
 		});
 
-		StandardButton exportImgBtn = roundButton(
-				SharedResources.INSTANCE.file_download_white(), "exportImage");
-		exportImgBtn.addFastClickHandler(source -> {
-			app.getDialogManager().showExportImageDialog(null);
-			hide();
-		});
-
-		StandardButton embedBtn = roundButton(
+		embedBtn = roundButton(
 				SharedResources.INSTANCE.code_white(), "Embed");
+		embedBtn.setStyleName("roundButton");
 		embedBtn.addFastClickHandler(source -> {
 			copyEmbedCode();
 			hide();
 		});
 
-		buttonPanel.add(printBtn);
-		buttonPanel.add(exportImgBtn);
-		buttonPanel.add(embedBtn);
+		exportImgBtn = roundButton(
+				SharedResources.INSTANCE.file_download_white(), "exportImage");
+		exportImgBtn.setStyleName("roundButton");
+		exportImgBtn.addFastClickHandler(source -> {
+			app.getDialogManager().showExportImageDialog(null);
+			hide();
+		});
 
-		contentPanel.add(buttonPanel);
-		addDialogContent(contentPanel);
+		cancelBtn = new StandardButton(localize("Cancel"), app);
+		cancelBtn.addFastClickHandler(source -> hide());
+		if (app.isMebis()) {
+			buttonPanel.setStyleName("DialogButtonPanel");
+			buttonPanel.add(cancelBtn);
+		} else {
+			buttonPanel.add(printBtn);
+			buttonPanel.add(exportImgBtn);
+			buttonPanel.add(embedBtn);
+		}
+		mainPanel.add(buttonPanel);
+		add(mainPanel);
+		setLabels();
+
+		copyBtn.addFastClickHandler(source -> {
+			app.copyTextToSystemClipboard(linkBox.getText());
+			hide();
+		});
 	}
 
 	private StandardButton roundButton(SVGResource icon, String titleKey) {
@@ -147,17 +170,34 @@ public class ShareLinkDialog extends ComponentDialog {
 			ToolTipManagerW.sharedInstance().showBottomMessage(
 					localize("CopiedToClipboard"), true, appW);
 		}
-		hide();
 	}
 
 	@Override
-	public void onResize(ResizeEvent resizeEvent) {
+	protected void onWindowResize() {
 		if (anchor == null) {
-			super.onResize(resizeEvent);
+			super.onWindowResize();
 		} else {
-			setPopupPosition(anchor.getAbsoluteLeft() - (this.getOffsetWidth()
-							- anchor.getOffsetWidth()), anchor.getAbsoluteTop() - 27);
+			setPopupPosition(anchor.getAbsoluteLeft() - 474,
+							anchor.getAbsoluteTop() - 27);
 		}
+	}
+
+	/**
+	 * set button labels and dialog title
+	 */
+	public void setLabels() {
+		// dialog title
+		getCaption().setText(
+				localize(app.isMebis() ? "shareByLink" : "Share"));
+		linkLabel.setText(localize("Link"));
+		copyBtn.setText(localize("Copy"));
+		printBtn.setText(localize("Print"));
+		embedBtn.setText(localize("Embed"));
+		exportImgBtn.setText(localize("exportImage"));
+		cancelBtn.setText(localize("Cancel"));
+
+		VendorSettings vendorSettings = ((AppW) app).getVendorSettings();
+		shareHelp.setText(localize(vendorSettings.getMenuLocalizationKey("SharedLinkHelpTxt")));
 	}
 
 	private String localize(String id) {
@@ -171,15 +211,14 @@ public class ShareLinkDialog extends ComponentDialog {
 			anchor.addStyleName("selected");
 		}
 		Scheduler.get().scheduleDeferred(this::focusLinkBox);
-
 	}
 
 	@Override
 	public void center() {
 		super.center();
 		if (anchor != null) {
-			setPopupPosition(anchor.getAbsoluteLeft() - (this.getOffsetWidth()
-					- anchor.getOffsetWidth()), anchor.getAbsoluteTop() - 27);
+			setPopupPosition(anchor.getAbsoluteLeft() - 474,
+					anchor.getAbsoluteTop() - 27);
 		}
 	}
 

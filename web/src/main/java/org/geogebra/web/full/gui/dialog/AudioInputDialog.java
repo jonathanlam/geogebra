@@ -4,10 +4,13 @@ import org.geogebra.common.euclidian.EuclidianConstants;
 import org.geogebra.common.kernel.ModeSetter;
 import org.geogebra.common.kernel.geos.GeoElement;
 import org.geogebra.common.media.MediaFactory;
+import org.geogebra.common.util.AsyncOperation;
+import org.geogebra.web.full.main.AppWFull;
 import org.geogebra.web.html5.main.AppW;
 
 /**
- * audio dialog
+ * @author csilla
+ *
  */
 public class AudioInputDialog extends MediaDialog {
 
@@ -15,20 +18,34 @@ public class AudioInputDialog extends MediaDialog {
 	 * @param app
 	 *            see {@link AppW}
 	 */
-	public AudioInputDialog(AppW app) {
-		super(app, "Audio");
+	public AudioInputDialog(AppWFull app) {
+		super(app.getPanel(), app);
+	}
+
+	/**
+	 * set button labels and dialog title
+	 */
+	@Override
+	public void setLabels() {
+		super.setLabels();
+		// dialog title
+		getCaption().setText(appW.getLocalization().getMenu("Audio"));
 	}
 
 	@Override
-	public void onPositiveAction() {
-		if (app.getGuiManager() != null) {
+	protected void processInput() {
+		if (appW.getGuiManager() != null) {
 			String url = getUrlWithProtocol();
 			mediaInputPanel.inputField.getTextComponent().setText(url);
-			app.getSoundManager().checkURL(url, ok -> {
-				if (ok) {
-					addAudio();
-				} else {
-					mediaInputPanel.showError("InvalidInput");
+			app.getSoundManager().checkURL(url, new AsyncOperation<Boolean>() {
+
+				@Override
+				public void callback(Boolean ok) {
+					if (ok) {
+						addAudio();
+					} else {
+						mediaInputPanel.showError("InvalidInput");
+					}
 				}
 			});
 		}
@@ -39,7 +56,7 @@ public class AudioInputDialog extends MediaDialog {
 	 */
 	void addAudio() {
 		mediaInputPanel.resetError();
-		GeoElement audio = new MediaFactory(app).addAudio(mediaInputPanel.getInput());
+		GeoElement audio = new MediaFactory(appW).addAudio(mediaInputPanel.getInput());
 		hide();
 		onMediaElementCreated(audio);
 	}
@@ -47,7 +64,7 @@ public class AudioInputDialog extends MediaDialog {
 	@Override
 	public void hide() {
 		super.hide();
-		app.getGuiManager().setMode(EuclidianConstants.MODE_SELECT_MOW,
+		appW.getGuiManager().setMode(EuclidianConstants.MODE_SELECT_MOW,
 				ModeSetter.TOOLBAR);
 	}
 }

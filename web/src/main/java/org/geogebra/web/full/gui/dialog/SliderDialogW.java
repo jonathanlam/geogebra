@@ -21,15 +21,22 @@ import org.geogebra.common.kernel.geos.GeoNumeric;
 import org.geogebra.common.kernel.kernelND.GeoElementND;
 import org.geogebra.common.main.Localization;
 import org.geogebra.web.full.gui.properties.SliderPanelW;
+import org.geogebra.web.html5.gui.GPopupPanel;
 import org.geogebra.web.html5.gui.HasKeyboardPopup;
 import org.geogebra.web.html5.gui.inputfield.AutoCompleteTextFieldW;
 import org.geogebra.web.html5.main.AppW;
-import org.geogebra.web.shared.components.ComponentDialog;
-import org.geogebra.web.shared.components.DialogData;
+import org.geogebra.web.shared.DialogBoxW;
 
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.CloseEvent;
+import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RadioButton;
@@ -39,81 +46,98 @@ import com.himamis.retex.editor.share.util.Unicode;
 /**
  * Web dialog for slider creation
  */
-public class SliderDialogW extends ComponentDialog implements
+public class SliderDialogW extends DialogBoxW implements ClickHandler,
 		ValueChangeHandler<Boolean>, HasKeyboardPopup {
+	private Button btOK;
+	private Button btCancel;
 	private AutoCompleteTextFieldW tfLabel;
 	private RadioButton rbNumber;
 	private RadioButton rbAngle;
 	private RadioButton rbInteger;
 	private SliderPanelW sliderPanel;
 	
+	private VerticalPanel mainWidget;
+	private VerticalPanel contentWidget;
+	private FlowPanel bottomWidget;
+	private HorizontalPanel radioButtonWidget;
+	private VerticalPanel nameWidget;
+	
+	private AppW appw;
+	
 	private GeoElement geoResult;
 	private GeoNumeric number;
 	private GeoAngle angle;
+	private Localization loc;
 			
 	/**
 	 * Creates a dialog to create a new GeoNumeric for a slider.
-	 *
-	 *  @param app
-	 *            application
-	 * @param data
-	 * 			  dialog transkeys
+	 * 
 	 * @param x
 	 *            x-coordinate of slider in screen coords
 	 * @param y
 	 *            x-coordinate of slider in screen coords
+	 * @param app
+	 *            application
 	 */
-	public SliderDialogW(final AppW app, DialogData data, int x, int y) {
-		super(app, data, false, true);
+	public SliderDialogW(final AppW app, int x, int y) {
+		super(false, true, null, app.getPanel(), app);
+
+		this.appw = app;
+		this.loc = app.getLocalization();
 		this.addStyleName("sliderDialog");
-		buildContent();
-		setOnPositiveAction(this::createSlider);
-		initResultGeo(x, y);
+		this.addStyleName("GeoGebraFrame");
 
-		if (!app.isWhiteboardActive()) {
-			app.registerPopup(this);
-		}
-		this.addCloseHandler(event -> {
-			app.unregisterPopup(this);
-			app.hideKeyboard();
-		});
-	}
-
-	private void initResultGeo(int x, int y) {
+		// create temp geos that may be returned as result
 		Construction cons = app.getKernel().getConstruction();
 
 		number = new GeoNumeric(cons);
 		angle = new GeoAngle(cons);
-
+		
 		// allow outside range 0-360
 		angle.setAngleStyle(AngleStyle.UNBOUNDED);
-
+		
 		GeoNumeric.setSliderFromDefault(number, false);
 		GeoNumeric.setSliderFromDefault(angle, true);
 		number.setValue(1);
 		angle.setValue(45 * Math.PI / 180);
-
+			
 		number.setSliderLocation(x, y, true);
 		angle.setSliderLocation(x, y, true);
-
+		
 		geoResult = null;
+
+		setWidget(mainWidget = new VerticalPanel());
+		addStyleName("GeoGebraPopup");
+		createGUI();
+		
+		this.setGlassEnabled(true);
+		this.setVisible(true);
 
 		GeoElement selGeo = rbAngle.getValue() ? angle : number;
 		Object [] geos = { selGeo };
 		sliderPanelUpdate(geos);
-		updateLabelField(number, false);
+		if (!app.isWhiteboardActive()) {
+			app.registerPopup(this);
+		}
+		this.addCloseHandler(new CloseHandler<GPopupPanel>() {
+			@Override
+			public void onClose(CloseEvent<GPopupPanel> event) {
+				app.unregisterPopup(SliderDialogW.this);
+				app.hideKeyboard();
+			}
+		});
 	}
 
-	private void buildContent() {
-		Localization loc = app.getLocalization();
-		VerticalPanel mainWidget = new VerticalPanel();
-		VerticalPanel contentWidget = new VerticalPanel();
-		mainWidget.add(contentWidget);
+	private void createGUI() {
+		getCaption().setText(loc.getMenu("Slider"));
 
-		VerticalPanel nameWidget = new VerticalPanel();
-		contentWidget.add(nameWidget);
-		HorizontalPanel radioButtonWidget = new HorizontalPanel();
-		contentWidget.add(radioButtonWidget);
+		// Create components to be displayed
+		mainWidget.add(contentWidget = new VerticalPanel());
+		mainWidget.add(bottomWidget = new FlowPanel());
+		bottomWidget.setStyleName("DialogButtonPanel");
+
+		contentWidget.add(nameWidget = new VerticalPanel());
+		contentWidget.add(radioButtonWidget = new HorizontalPanel());
 		radioButtonWidget.setStyleName("DialogRbPanel");
 
 		// radio buttons for number or angle
@@ -130,21 +154,33 @@ public class SliderDialogW extends ComponentDialog implements
 		radioButtonWidget.add(rbAngle);
 		radioButtonWidget.add(rbInteger);			
 
-		sliderPanel = new SliderPanelW((AppW) app, true, true);
+		sliderPanel = new SliderPanelW(appw, true, true);
 		sliderPanel.getWidget().setStyleName("sliderPanelWidget");
 
 		Label nameLabel = new Label(loc.getMenu("Name"));
-		nameLabel.setStyleName("coloredLabel");
+		if (appw.isUnbundledOrWhiteboard()) {
+			nameLabel.setStyleName("coloredLabel");
+		}
 		nameWidget.add(nameLabel);
 		
-		tfLabel = new AutoCompleteTextFieldW(-1, app);
+		tfLabel = new AutoCompleteTextFieldW(-1, appw);
 		tfLabel.enableGGBKeyboard();
+		updateLabelField(number, false);
 		tfLabel.requestToShowSymbolButton();
 		nameWidget.add(tfLabel);
 		
 		contentWidget.add(sliderPanel.getWidget());
 
-		addDialogContent(mainWidget);
+		// buttons
+		btOK = new Button(loc.getMenu("OK"));
+		btOK.addClickHandler(this);
+
+		btCancel = new Button(loc.getMenu("Cancel"));
+		btCancel.addStyleName("cancelBtn");
+		btCancel.addClickHandler(this);
+
+		bottomWidget.add(btOK);
+		bottomWidget.add(btCancel);
 	}
 
 	private void updateLabelField(GeoNumeric geo, boolean isInteger) {
@@ -166,7 +202,7 @@ public class SliderDialogW extends ComponentDialog implements
 			String strLabel;
 			String text = tfLabel.getText();
 			try {
-				strLabel = app.getKernel().getAlgebraProcessor()
+				strLabel = appw.getKernel().getAlgebraProcessor()
 						.parseLabel(text);
 			} catch (Exception e) {
 				strLabel = null;
@@ -205,22 +241,30 @@ public class SliderDialogW extends ComponentDialog implements
 		return geoResult;
 	}
 
-	private void createSlider() {
-		geoResult = rbAngle.getValue() ? angle : number;
-		getResult();
-		geoResult.setLabelMode(GeoElementND.LABEL_NAME_VALUE);
-		geoResult.setLabelVisible(true);
-		sliderPanel.applyAll(geoResult);
-		geoResult.update();
-		if (!rbAngle.getValue()) {
-			AdjustSlider.ensureOnScreen((GeoNumeric) geoResult,
-					app.getActiveEuclidianView());
+	@Override
+	public void onClick(ClickEvent e) {
+		Element target = e.getNativeEvent().getEventTarget().cast();
+		if (target == btOK.getElement()) {
+			geoResult = rbAngle.getValue() ? angle : number;
+			getResult();
+			geoResult.setLabelMode(GeoElementND.LABEL_NAME_VALUE);
+			geoResult.setLabelVisible(true);
+			sliderPanel.applyAll(geoResult);
+			geoResult.update();
+			if (!rbAngle.getValue()) {
+				AdjustSlider.ensureOnScreen((GeoNumeric) geoResult,
+						appw.getActiveEuclidianView());
+			}
+
+			hide();
+			appw.getActiveEuclidianView().requestFocusInWindow();
+
+			appw.storeUndoInfo();
+			appw.getKernel().notifyRepaint();
+		} else if (target == btCancel.getElement()) {
+			hide();
+			appw.getActiveEuclidianView().requestFocusInWindow();
 		}
-
-		app.getActiveEuclidianView().requestFocusInWindow();
-
-		app.storeUndoInfo();
-		app.getKernel().notifyRepaint();
 	}
 
 	@Override
@@ -233,7 +277,7 @@ public class SliderDialogW extends ComponentDialog implements
 			number.setIntervalMax(30);
 			updateLabelField(number, true);
 		} else if (vc.getSource() == rbNumber) {
-			GeoNumeric num = app.getKernel().getAlgoDispatcher().getDefaultNumber(false);
+			GeoNumeric num = appw.getKernel().getAlgoDispatcher().getDefaultNumber(false);
 			number.setAutoStep(num.isAutoStep());
 			number.setAnimationStep(num.getAnimationStep());
 			number.setIntervalMin(num.getIntervalMin());
@@ -250,4 +294,5 @@ public class SliderDialogW extends ComponentDialog implements
 	private void sliderPanelUpdate(Object[] geos) {
 		sliderPanel.updatePanel(geos);
 	}
+	
 }

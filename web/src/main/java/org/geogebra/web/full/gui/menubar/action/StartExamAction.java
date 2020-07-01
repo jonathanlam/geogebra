@@ -4,7 +4,6 @@ import org.geogebra.common.util.AsyncOperation;
 import org.geogebra.web.full.gui.exam.ExamStartDialog;
 import org.geogebra.web.full.gui.menubar.DefaultMenuAction;
 import org.geogebra.web.full.main.AppWFull;
-import org.geogebra.web.shared.components.DialogData;
 
 /**
  * Starts exam.
@@ -30,20 +29,16 @@ public class StartExamAction extends DefaultMenuAction<Void> {
 	 * (goes fullscreen)
 	 */
 	private AsyncOperation<Boolean> createExamCallback() {
-		return startExam -> {
-			app.fileNew();
-			app.getLAF().toggleFullscreen(true);
-			DialogData data = new DialogData("exam_menu_enter", "Cancel",
-					"exam_start_button");
-			ExamStartDialog examStartDialog = new ExamStartDialog(app, data);
-			examStartDialog.setOnNegativeAction(() -> {
-				app.getLAF().toggleFullscreen(false);
-			});
-			examStartDialog.setOnPositiveAction(() -> {
-				app.setNewExam();
-				app.startExam();
-			});
-			examStartDialog.show();
+		return new AsyncOperation<Boolean>() {
+
+			@Override
+			public void callback(Boolean active) {
+				app.fileNew();
+				app.getLAF().toggleFullscreen(true);
+				ExamStartDialog examStartDialog = new ExamStartDialog(app);
+				examStartDialog.show();
+				examStartDialog.center();
+			}
 		};
 	}
 }

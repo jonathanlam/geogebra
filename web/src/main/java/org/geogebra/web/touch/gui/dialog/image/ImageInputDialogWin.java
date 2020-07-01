@@ -1,9 +1,12 @@
 package org.geogebra.web.touch.gui.dialog.image;
 
-import org.geogebra.web.html5.main.AppW;
+import org.geogebra.common.main.App;
 
 /**
  * Image picker and camera dialog for Win store
+ * 
+ * @author Zbynek
+ *
  */
 public class ImageInputDialogWin extends ImageInputDialogT {
 	
@@ -11,7 +14,7 @@ public class ImageInputDialogWin extends ImageInputDialogT {
 	 * @param app
 	 *            application
 	 */
-	public ImageInputDialogWin(AppW app) {
+	public ImageInputDialogWin(App app) {
 		super(app);
 	}
 	

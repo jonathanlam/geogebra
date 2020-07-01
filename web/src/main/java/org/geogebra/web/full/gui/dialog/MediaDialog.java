@@ -4,48 +4,58 @@ import org.geogebra.common.GeoGebraConstants;
 import org.geogebra.common.euclidian.EuclidianConstants;
 import org.geogebra.common.kernel.ModeSetter;
 import org.geogebra.common.kernel.geos.GeoElement;
-
-import org.geogebra.web.html5.main.AppW;
-import org.geogebra.web.shared.components.ComponentDialog;
-import org.geogebra.web.shared.components.DialogData;
+import org.geogebra.web.full.main.AppWFull;
 
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Panel;
 
 /**
- * Audio / video / embed dialog.
+ * Audio / video dialog.
+ *
+ * @author Zbynek
  */
+public abstract class MediaDialog extends OptionDialog {
 
-public abstract class MediaDialog extends ComponentDialog {
-
+	protected AppWFull appW;
 	protected MediaInputPanel mediaInputPanel;
 
 	/**
+	 * @param root
+	 *            popup root
 	 * @param app
 	 *            app
-	 * @param dialogTitle
-	 * 			  title of dialog
 	 */
-
-	public MediaDialog(AppW app, String dialogTitle) {
-		super(app, new DialogData(dialogTitle, "Cancel", "Insert"),
-				false, true);
-		addStyleName("mediaDialog");
-		addStyleName(dialogTitle);
-		addStyleName("mebis");
-		buildContent();
+	public MediaDialog(Panel root, AppWFull app) {
+		super(root, app);
+		this.appW = app;
+		initGui();
 	}
 
-	private void buildContent() {
-		FlowPanel contentPanel = new FlowPanel();
+	protected void initGui() {
+		FlowPanel mainPanel = new FlowPanel();
 
-		mediaInputPanel = new MediaInputPanel((AppW) app, this, "Link", true);
+		mediaInputPanel = new MediaInputPanel(appW, this, "Link", true);
 		mediaInputPanel.addPlaceholder(app.getLocalization().getMenu("pasteLink"));
 
-		contentPanel.add(mediaInputPanel);
-		addDialogContent(contentPanel);
+		// add panels
+		add(mainPanel);
+		mainPanel.add(mediaInputPanel);
+		mainPanel.add(getButtonPanel());
+		setLabels();
+
+		// style
+		addStyleName("GeoGebraPopup");
+		addStyleName("mediaDialog");
+		addStyleName("mebis");
 
 		mediaInputPanel.focusDeferred();
-		setPosBtnDisabled(true);
+	}
+
+	/**
+	 * set button labels
+	 */
+	public void setLabels() {
+		updateButtonLabels("Insert");
 	}
 
 	/**
@@ -71,7 +81,7 @@ public abstract class MediaDialog extends ComponentDialog {
 
 	@Override
 	public void hide() {
-		app.getGuiManager().setMode(EuclidianConstants.MODE_MOVE,
+		appW.getGuiManager().setMode(EuclidianConstants.MODE_MOVE,
 				ModeSetter.TOOLBAR);
 		super.hide();
 	}

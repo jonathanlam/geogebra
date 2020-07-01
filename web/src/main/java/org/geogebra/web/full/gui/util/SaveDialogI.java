@@ -12,6 +12,8 @@ public interface SaveDialogI {
 
 	void setSaveType(MaterialType type);
 
+	void setLabels();
+
 	void hide();
 
 	/**

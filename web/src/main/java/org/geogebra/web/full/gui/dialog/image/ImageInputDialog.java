@@ -2,66 +2,54 @@ package org.geogebra.web.full.gui.dialog.image;
 
 import org.geogebra.common.euclidian.EuclidianConstants;
 import org.geogebra.common.kernel.ModeSetter;
+import org.geogebra.common.main.App;
 import org.geogebra.web.html5.Browser;
 import org.geogebra.web.html5.main.AppW;
 import org.geogebra.web.html5.webcam.WebcamDialogInterface;
 
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Label;
 
-public class ImageInputDialog extends UploadImageDialog
-		implements WebcamDialogInterface, ClickHandler {
+public class ImageInputDialog extends UploadImageDialog implements WebcamDialogInterface {
+
 	private static final int PREVIEW_HEIGHT = 155;
 	private static final int PREVIEW_WIDTH = 213;
 
 	private WebCamInputPanel webcamPanel;
 	private Label webcamLabel;
 
-	/**
-	 * constructor
-	 * @param app see {@link AppW}
-	 */
-	public ImageInputDialog(AppW app) {
-		super(app, PREVIEW_WIDTH, PREVIEW_HEIGHT);
-		setOnNegativeAction(() -> {
-			app.getImageManager().setPreventAuxImage(false);
-			app.getGuiManager().setMode(EuclidianConstants.MODE_MOVE,
-					ModeSetter.TOOLBAR);
-		});
-		setOnPositiveAction(this::positiveAction);
-	}
-
-	private void positiveAction() {
-		String data;
-		String name;
-		if (webcamPanel == null) { // file upload
-			data = uploadImagePanel.getImageDataURL();
-			name = uploadImagePanel.getFileName();
-
-		} else { // webcam
-			data = webcamPanel.getImageDataURL();
-			name = "webcam";
-		}
-		if (location != null && !location.isLabelSet()) {
-			location.setLabel(null);
-		}
-		((AppW) app).imageDropHappened(name, data);
+	public ImageInputDialog(App app) {
+		super((AppW) app, PREVIEW_WIDTH, PREVIEW_HEIGHT);
 	}
 
 	@Override
-	protected void buildContent() {
-		super.buildContent();
+	protected void initGUI() {
+		super.initGUI();
 		addStyleName("camera");
 		if (webcamSupported()) {
-			listPanel.add(webcamLabel = new Label(app.getLocalization().getMenu("Webcam")));
-			webcamLabel.addClickHandler(this);
+			listPanel.add(webcamLabel = new Label(""));
 		}
 	}
 
 	protected boolean webcamSupported() {
 		return Browser.supportsWebcam();
+	}
+
+	@Override
+	protected void initActions() {
+		super.initActions();
+		if (webcamLabel != null) {
+			webcamLabel.addClickHandler(this);
+		}
+	}
+
+	@Override
+	public void setLabels() {
+		super.setLabels();
+		if (webcamLabel != null) {
+			webcamLabel.setText(appw.getLocalization().getMenu("Webcam"));
+		}
 	}
 
 	@Override
@@ -84,7 +72,7 @@ public class ImageInputDialog extends UploadImageDialog
 		upload.removeStyleDependentName("highlighted");
 		defaultToUpload = false;
 		if (webcamPanel == null) {
-			webcamPanel = new WebCamInputPanel((AppW) app, this);
+			webcamPanel = new WebCamInputPanel(appw, this);
 		} else {
 			webcamPanel.startVideo();
 		}
@@ -96,7 +84,28 @@ public class ImageInputDialog extends UploadImageDialog
 	@Override
 	public void onClick(ClickEvent event) {
 		Object source = event.getSource();
-		if (source == upload) {
+		if (source == insertBtn) {
+	    	String data;
+	    	String name;
+	    	if (webcamPanel == null) { // file upload
+	    		data = uploadImagePanel.getImageDataURL();
+	    		name = uploadImagePanel.getFileName();
+
+	    	} else { // webcam
+	    		data = webcamPanel.getImageDataURL();
+	    		name = "webcam";
+	    	}
+			if (location != null && !location.isLabelSet()) {
+				location.setLabel(null);
+	    	}
+			appw.imageDropHappened(name, data);
+	    	hide();
+	    } else if (source == cancelBtn) {
+	      	appw.getImageManager().setPreventAuxImage(false);
+			appw.getGuiManager().setMode(EuclidianConstants.MODE_MOVE,
+					ModeSetter.TOOLBAR);
+	  	   	hide();
+	    } else if (source == upload) {
 	    	uploadClicked();
 	    	centerAndResize(0);
 	    } else if (webcamLabel != null && source == webcamLabel) {

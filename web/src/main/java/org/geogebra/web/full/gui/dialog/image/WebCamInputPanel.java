@@ -8,7 +8,6 @@ import org.geogebra.web.html5.main.AppW;
 import org.geogebra.web.html5.webcam.WebCamAPI;
 import org.geogebra.web.html5.webcam.WebCamInterface;
 import org.geogebra.web.html5.webcam.WebcamDialogInterface;
-import org.geogebra.web.shared.components.DialogData;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
@@ -23,6 +22,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
  * Panel for HTML5 webcam input
  */
 public class WebCamInputPanel extends VerticalPanel implements WebCamInterface {
+
 	private SimplePanel inputWidget;
 	private Element video;
 	private Element errorPanel;
@@ -137,48 +137,27 @@ public class WebCamInputPanel extends VerticalPanel implements WebCamInterface {
 		}
 	}
 
-	private void showPermissionDialog(DialogData data, String msgTranskey) {
+	private void showPermissionDialog(WebcamPermissionDialog.DialogType dialogType) {
 		hidePermissionDialog();
-		permissionDialog = new WebcamPermissionDialog(app, data, msgTranskey);
+		permissionDialog = new WebcamPermissionDialog(app, dialogType);
 		permissionDialog.center();
 		permissionDialog.show();
 	}
 
-	private String getPermissionDeniedTitleKey() {
-		return Browser.isElectron() && Browser.isMacOS() && !app.isMebis() ? "permission.camera"
-				+ ".denied" : "Webcam.Denied.Caption";
-	}
-
-	private String getPermissionDeniedMessageKey() {
-		return Browser.isElectron() && Browser.isMacOS() && !app.isMebis() ? "permission"
-				+ ".request" : "Webcam.Denied.Message";
-	}
-
 	private void showRequestDialog() {
-		DialogData data = new DialogData(app.getVendorSettings()
-				.getMenuLocalizationKey("Webcam.Request"),
-				null, null);
-		showPermissionDialog(data, app.getVendorSettings()
-				.getMenuLocalizationKey("Webcam.Request.Message"));
+		showPermissionDialog(WebcamPermissionDialog.DialogType.PERMISSION_REQUEST);
 	}
 
 	private void showPermissionDeniedDialog() {
-		DialogData data = new DialogData(getPermissionDeniedTitleKey(),
-				null, "OK");
-		showPermissionDialog(data, getPermissionDeniedMessageKey());
+		showPermissionDialog(WebcamPermissionDialog.DialogType.PERMISSION_DENIED);
 	}
 
 	private void showErrorDialog() {
-		DialogData data = new DialogData("Webcam.Problem",
-				null, "OK");
-		showPermissionDialog(data, app.getVendorSettings()
-				.getMenuLocalizationKey("Webcam.Problem.Message"));
+		showPermissionDialog(WebcamPermissionDialog.DialogType.ERROR);
 	}
 
 	private void showNotSupportedDialog() {
-		DialogData data = new DialogData("Webcam.Notsupported.Caption",
-				null, "OK");
-		showPermissionDialog(data, "Webcam.Notsupported.Message");
+		showPermissionDialog(WebcamPermissionDialog.DialogType.NOT_SUPPORTED);
 	}
 
 	/**

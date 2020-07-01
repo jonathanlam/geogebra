@@ -14,6 +14,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
  *
  */
 public class UploadImagePanel extends VerticalPanel {
+	
 	private String fileData;
 	private String fileName;
 

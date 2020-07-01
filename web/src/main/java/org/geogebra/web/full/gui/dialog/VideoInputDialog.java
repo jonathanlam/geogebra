@@ -5,9 +5,12 @@ import org.geogebra.common.kernel.ModeSetter;
 import org.geogebra.common.media.MediaFactory;
 import org.geogebra.common.media.MediaURLParser;
 import org.geogebra.common.media.VideoURL;
+import org.geogebra.web.full.main.AppWFull;
 import org.geogebra.web.html5.main.AppW;
 
-/** video dialog
+/**
+ * @author csilla
+ *
  */
 public class VideoInputDialog extends MediaDialog {
 
@@ -15,15 +18,25 @@ public class VideoInputDialog extends MediaDialog {
 	 * @param app
 	 *            see {@link AppW}
 	 */
+	public VideoInputDialog(AppWFull app) {
+		super(app.getPanel(), app);
+	}
 
-	public VideoInputDialog(AppW app) {
-		super(app, "Video");
+	/**
+	 * set button labels and dialog title
+	 */
+	@Override
+	public void setLabels() {
+		super.setLabels();
+		// dialog title
+		getCaption().setText(appW.getLocalization().getMenu("Video"));
 	}
 
 	@Override
-	public void onPositiveAction() {
-		if (app.getGuiManager() != null) {
+	protected void processInput() {
+		if (appW.getGuiManager() != null) {
 			String url = getUrlWithProtocol();
+			// inputField.getTextComponent().setText("https://www.youtube.com/watch?v=Kc2iLAubras");
 			mediaInputPanel.inputField.getTextComponent().setText(url);
 			VideoURL videoURL = MediaURLParser.checkVideo(url);
 			if (videoURL.isValid()) {
@@ -43,13 +56,13 @@ public class VideoInputDialog extends MediaDialog {
 	private void addVideo(VideoURL videoURL) {
 		mediaInputPanel.resetError();
 		hide();
-		new MediaFactory(app).addVideo(videoURL);
+		new MediaFactory(appW).addVideo(videoURL);
 	}
 
 	@Override
 	public void hide() {
 		super.hide();
-		app.getGuiManager().setMode(EuclidianConstants.MODE_SELECT_MOW,
+		appW.getGuiManager().setMode(EuclidianConstants.MODE_SELECT_MOW,
 				ModeSetter.TOOLBAR);
 	}
 }
