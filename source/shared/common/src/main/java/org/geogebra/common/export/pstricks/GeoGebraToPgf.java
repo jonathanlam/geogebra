@@ -2010,6 +2010,12 @@ public class GeoGebraToPgf extends GeoGebraExport {
 	@Override
 	protected void drawGeoPoint(GeoPointND gp) {
 		if (frame.getExportPointSymbol()) {
+			// Skip points with empty/null labels (unnamed intersection points, etc.)
+			String pointLabel = gp.getLabelSimple();
+			if (pointLabel == null || pointLabel.isEmpty()) {
+				return;
+			}
+
 			double[] A = new double[3];
 
 			// assume 2D (3D check done earlier)
@@ -2019,7 +2025,6 @@ public class GeoGebraToPgf extends GeoGebraExport {
 			double y = A[1];
 
 			// Register the point for named coordinate output
-			String pointLabel = gp.getLabelSimple();
 			registerPoint(pointLabel, x, y);
 
 			GColor dotcolor = gp.getObjectColor();
@@ -2028,6 +2033,21 @@ public class GeoGebraToPgf extends GeoGebraExport {
 
 			if (dotstyle == -1) { // default
 				dotstyle = EuclidianStyleConstants.POINT_STYLE_DOT;
+			}
+
+			// Check for purple points - render as labels only
+			int red = dotcolor.getRed();
+			int green = dotcolor.getGreen();
+			int blue = dotcolor.getBlue();
+			if (red == 127 && green == 0 && blue == 255) {
+				startBeamer(codePoint);
+				String label = gp.getCaption(getStringTemplate());
+				String nodePosition = getNodePosition(gp);
+				codePoint.append("\\draw ");
+				writePointOrName(x, y, codePoint);
+				codePoint.append(" node [" + nodePosition + "] {$" + label + "$};\n");
+				endBeamer(codePoint);
+				return;
 			}
 
 			startBeamer(codePoint);
@@ -2223,31 +2243,21 @@ public class GeoGebraToPgf extends GeoGebraExport {
 			// default is the circle point style
 			else {
 				// draw point
-				int red = dotcolor.getRed();
-				int green = dotcolor.getGreen();
-				int blue = dotcolor.getBlue();
 				String label = gp.getCaption(getStringTemplate());
 				String nodePosition = getNodePosition(gp);
-				if (red == 127 && green == 0 && blue == 255) {
-					// purple points are rendered as labels only
-					codePoint.append("\\draw ");
-					writePointOrName(x, y, codePoint);
-					codePoint.append(" node [" + nodePosition + "] {$" + label + "$};\n");
-				} else {
-					codePoint.append("\\draw [fill=");
-					colorCode(dotcolor, codePoint);
-					codePoint.append("] ");
-					writePointOrName(x, y, codePoint);
-					codePoint.append(" circle (");
-					codePoint.append(formatRadius(dotsize / 2));
-					codePoint.append("pt)");
+				codePoint.append("\\draw [fill=");
+				colorCode(dotcolor, codePoint);
+				codePoint.append("] ");
+				writePointOrName(x, y, codePoint);
+				codePoint.append(" circle (");
+				codePoint.append(formatRadius(dotsize / 2));
+				codePoint.append("pt)");
 
-					if (gp.isLabelVisible()) {
-						codePoint.append(" node [" + nodePosition + "] {$" + label + "$}");
-					}
-
-					codePoint.append(";\n");
+				if (gp.isLabelVisible()) {
+					codePoint.append(" node [" + nodePosition + "] {$" + label + "$}");
 				}
+
+				codePoint.append(";\n");
 			}
 			endBeamer(codePoint);
 		}
