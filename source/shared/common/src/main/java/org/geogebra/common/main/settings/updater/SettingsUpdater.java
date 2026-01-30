@@ -67,7 +67,7 @@ public class SettingsUpdater {
 	}
 
 	private void setSortModeForCompactOutput() {
-		settings.getAlgebra().setTreeMode(AlgebraView.SortMode.ORDER);
+		settings.getAlgebra().setTreeMode(AlgebraView.SortMode.TYPE);
 	}
 
 	private void setEuclidianSettings() {

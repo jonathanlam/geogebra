@@ -151,6 +151,12 @@ public enum Commands implements CommandsConstants,
 
 	TriangleCenter(TABLE_GEOMETRY),
 
+	Incenter(TABLE_GEOMETRY),
+
+	Circumcenter(TABLE_GEOMETRY),
+
+	Orthocenter(TABLE_GEOMETRY),
+
 	Barycenter(TABLE_GEOMETRY),
 
 	Trilinear(TABLE_GEOMETRY),

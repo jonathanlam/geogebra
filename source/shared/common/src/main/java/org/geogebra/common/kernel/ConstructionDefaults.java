@@ -222,7 +222,7 @@ public class ConstructionDefaults implements SettingListener {
 	// angles
 
 	/** default alpha for angles */
-	public static final float DEFAULT_ANGLE_ALPHA = 0.1f;
+	public static final float DEFAULT_ANGLE_ALPHA = 0f;
 
 	// numbers eg integrals, barcharts
 	/** default alpha for integrals, barcharts, .. */
@@ -327,8 +327,7 @@ public class ConstructionDefaults implements SettingListener {
 
 	/** default color for angles */
 	private final GColor colAngle() {
-		return cons.getApplication().isUnbundledOrWhiteboard() ? GColor.BLACK
-				: GeoGebraColorConstants.GGB_GREEN;
+		return GColor.BLACK;
 	}
 
 	/**
@@ -662,6 +661,7 @@ public class ConstructionDefaults implements SettingListener {
 		if (useNotReflexAngles) { // in Geometry app
 			angle.setAngleStyle(AngleStyle.NOTREFLEX);
 		}
+		angle.setLabelVisible(false);
 		defaultGeoElements.put(DEFAULT_ANGLE, angle);
 
 		// function

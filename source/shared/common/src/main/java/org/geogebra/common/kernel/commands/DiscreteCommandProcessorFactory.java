@@ -18,8 +18,11 @@ package org.geogebra.common.kernel.commands;
 
 import org.geogebra.common.kernel.Kernel;
 import org.geogebra.common.kernel.barycentric.CmdBarycenter;
+import org.geogebra.common.kernel.barycentric.CmdCircumcenter;
 import org.geogebra.common.kernel.barycentric.CmdCubic;
+import org.geogebra.common.kernel.barycentric.CmdIncenter;
 import org.geogebra.common.kernel.barycentric.CmdKimberling;
+import org.geogebra.common.kernel.barycentric.CmdOrthocenter;
 import org.geogebra.common.kernel.barycentric.CmdTriangleCurve;
 import org.geogebra.common.kernel.barycentric.CmdTrilinear;
 import org.geogebra.common.kernel.discrete.CmdConvexHull;
@@ -41,6 +44,12 @@ public class DiscreteCommandProcessorFactory implements CommandProcessorFactory 
 
 		case TriangleCenter:
 			return new CmdKimberling(kernel);
+		case Incenter:
+			return new CmdIncenter(kernel);
+		case Circumcenter:
+			return new CmdCircumcenter(kernel);
+		case Orthocenter:
+			return new CmdOrthocenter(kernel);
 		case Barycenter:
 			return new CmdBarycenter(kernel);
 		case Trilinear:

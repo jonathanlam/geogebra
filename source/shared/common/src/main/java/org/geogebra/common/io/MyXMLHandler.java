@@ -3577,9 +3577,8 @@ public class MyXMLHandler implements DocHandler {
 
 	private boolean handleAlgebraViewMode(LinkedHashMap<String, String> attrs) {
 		try {
-			int val = !app.isUnbundled() || !PreviewFeature.isAvailable(SETTINGS_VIEW)
-					? Integer.parseInt(attrs.get("val"))
-					: AlgebraView.SortMode.ORDER.toInt();
+			// Always use TYPE as the default sort mode
+			int val = AlgebraView.SortMode.TYPE.toInt();
 			app.getSettings().getAlgebra().setTreeMode(val);
 			app.getSettings().getAlgebra().setModeChanged(true);
 

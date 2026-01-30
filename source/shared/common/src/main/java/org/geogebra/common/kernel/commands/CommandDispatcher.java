@@ -872,6 +872,9 @@ public abstract class CommandDispatcher {
 				return getStatsCommandProcessorFactory().getProcessor(command, kernel);
 
 			case TriangleCenter:
+			case Incenter:
+			case Circumcenter:
+			case Orthocenter:
 			case Barycenter:
 			case Trilinear:
 			case Cubic:
