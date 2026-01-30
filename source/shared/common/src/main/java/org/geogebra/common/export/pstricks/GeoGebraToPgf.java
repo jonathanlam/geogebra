@@ -244,7 +244,10 @@ public class GeoGebraToPgf extends GeoGebraExport {
 		 * drawGeoElement(g,false); }
 		 */
 		// add code for Points and Labels
-		code.append(codePoint);
+		if (codePoint.length() > 0) {
+			code.append("% Points and labels\n");
+			code.append(codePoint);
+		}
 		// Close Environment tikzpicture
 		if (format == GeoGebraToPgf.FORMAT_LATEX) {
 			if (euclidianView.getShowXaxis()
@@ -271,9 +274,16 @@ public class GeoGebraToPgf extends GeoGebraExport {
 		 * (null!=formatFont){ codeBeginPic.insert(0,formatFont+"\n");
 		 * code.append("}\n"); }
 		 */
-		code.insert(0, codeFilledObject);
-		// Insert coordinate definitions after clipping
+		// Add section comments and assemble code
+		if (code.length() > 0) {
+			code.insert(0, "% Lines and segments\n");
+		}
+		if (codeFilledObject.length() > 0) {
+			code.insert(0, codeFilledObject);
+			code.insert(0, "% Circles and curves\n");
+		}
 		if (codeCoordinates.length() > 0) {
+			codeCoordinates.insert(0, "% Coordinates\n");
 			code.insert(0, codeCoordinates);
 		}
 		code.insert(0, codeBeginDoc);
