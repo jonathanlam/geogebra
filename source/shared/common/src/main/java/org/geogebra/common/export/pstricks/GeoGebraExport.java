@@ -129,7 +129,7 @@ public abstract class GeoGebraExport {
 		this.kernel = app.getKernel();
 		this.construction = kernel.getConstruction();
 		this.euclidianView = app.getActiveEuclidianView();
-		this.tpl = StringTemplate.printFigures(StringType.PSTRICKS, 12, false);
+		this.tpl = StringTemplate.printDecimals(StringType.PSTRICKS, 3, false);
 		initBounds();
 	}
 
@@ -141,8 +141,17 @@ public abstract class GeoGebraExport {
 	}
 
 	protected String format(double d) {
-		String ret = kernel.format(DoubleUtil.checkDecimalFraction(d), tpl);
-		return StringUtil.canonicalNumber2(ret);
+		// Round to 3 decimal places for cleaner TikZ output
+		double rounded = Math.round(d * 1000.0) / 1000.0;
+		if (rounded == (long) rounded) {
+			return String.valueOf((long) rounded);
+		}
+		String s = String.valueOf(rounded);
+		// Remove trailing zeros after decimal point
+		if (s.contains(".")) {
+			s = s.replaceAll("0+$", "").replaceAll("\\.$", "");
+		}
+		return s;
 	}
 
 	// Functions added to access and modify xmin, xmax, ymin and ymax
@@ -357,10 +366,10 @@ public abstract class GeoGebraExport {
 				&& (g.isEuclidianVisible() || trimmedInter)) {
 			if (g instanceof GeoPointND) {
 				drawGeoPoint((GeoPointND) g);
-				drawLabel(g, null);
+				//drawLabel(g, null);
 			} else if (g instanceof GeoSegmentND) {
 				drawGeoSegment((GeoSegmentND) g);
-				drawLabel(g, null);
+				//drawLabel(g, null);
 			} else if (g instanceof GeoRayND) {
 				drawGeoRay((GeoRayND) g);
 				drawLabel(g, null);
@@ -433,7 +442,7 @@ public abstract class GeoGebraExport {
 				}
 			} else if (g instanceof GeoVector) {
 				drawGeoVector((GeoVector) g);
-				drawLabel(g, null);
+				// drawLabel(g, null);
 			} else if (g instanceof GeoConicPart) {
 				GeoConicPart geo = (GeoConicPart) g;
 				drawGeoConicPart(geo);

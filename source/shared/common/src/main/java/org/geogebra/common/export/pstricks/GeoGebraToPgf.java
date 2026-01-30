@@ -96,6 +96,43 @@ public class GeoGebraToPgf extends GeoGebraExport {
 	private boolean forceGnuplot = false;
 	private boolean gnuplotWarning = false;
 	private boolean hatchWarning = false;
+	/** Map from point coordinates (as string "x,y") to point name */
+	private HashMap<String, String> pointNames;
+	/** StringBuilder for coordinate definitions */
+	private StringBuilder codeCoordinates;
+	/** Set of segment keys that belong to polygons (to avoid drawing them twice) */
+	private java.util.HashSet<String> polygonSegments;
+	/** List of segments to be processed for chain detection */
+	private ArrayList<SegmentInfo> pendingSegments;
+
+	/**
+	 * Stores information about a segment for chain detection
+	 */
+	private static class SegmentInfo {
+		final String startKey;
+		final String endKey;
+		final double[] start;
+		final double[] end;
+		final String lineOptions;
+		final String label;
+		final boolean hasLabel;
+		final int decoration;
+		final GeoSegmentND geo;
+		boolean used = false;
+
+		SegmentInfo(double[] start, double[] end, String startKey, String endKey,
+				String lineOptions, String label, boolean hasLabel, int decoration, GeoSegmentND geo) {
+			this.start = start.clone();
+			this.end = end.clone();
+			this.startKey = startKey;
+			this.endKey = endKey;
+			this.lineOptions = lineOptions;
+			this.label = label;
+			this.hasLabel = hasLabel;
+			this.decoration = decoration;
+			this.geo = geo;
+		}
+	}
 
 	/**
 	 * @param app application
@@ -121,7 +158,11 @@ public class GeoGebraToPgf extends GeoGebraExport {
 
 		codeFilledObject = new StringBuilder();
 		codeBeginDoc = new StringBuilder();
+		codeCoordinates = new StringBuilder();
 		customColor = new HashMap<>();
+		pointNames = new HashMap<>();
+		polygonSegments = new java.util.HashSet<>();
+		pendingSegments = new ArrayList<>();
 		if (format == GeoGebraToPgf.FORMAT_LATEX) {
 			codePreamble.append("\\documentclass[");
 			codePreamble.append(frame.getFontSize());
@@ -186,19 +227,16 @@ public class GeoGebraToPgf extends GeoGebraExport {
 		} else if (euclidianView.getShowGrid()) {
 			drawGrid();
 		}
-		// Clipping
-		codeFilledObject.append("\\clip");
-		writePoint(xmin, ymin, codeFilledObject);
-		codeFilledObject.append(" rectangle ");
-		writePoint(xmax, ymax, codeFilledObject);
-		codeFilledObject.append(";\n");
-
 		/*
 		 * get all objects from construction and "draw" them by creating PGF
 		 * code
 		 */
 
 		drawAllElements();
+
+		// Process pending segments and combine connected ones into chains
+		processSegmentChains();
+
 		/*
 		 * Object [] geos =
 		 * kernel.getConstruction().getGeoSetConstructionOrder().toArray(); for
@@ -241,6 +279,10 @@ public class GeoGebraToPgf extends GeoGebraExport {
 		 * code.append("}\n"); }
 		 */
 		code.insert(0, codeFilledObject);
+		// Insert coordinate definitions after clipping
+		if (codeCoordinates.length() > 0) {
+			code.insert(0, codeCoordinates);
+		}
 		code.insert(0, codeBeginDoc);
 		code.insert(0, codePreamble);
 		frame.write(code);
@@ -977,25 +1019,42 @@ public class GeoGebraToPgf extends GeoGebraExport {
 
 	@Override
 	protected void drawPolygon(GeoPolygon geo) {
-		// command: \pspolygon[par](x0,y0)....(xn,yn)
+		// Draw polygon as a single path: (A) -- (B) -- (C) -- cycle
 		double alpha = geo.getAlphaValue();
 		if (alpha == 0.0f && geo.getFillType() == FillType.IMAGE) {
 			return;
 		}
+
+		GeoPointND[] points = geo.getPoints();
+
+		// Register all segments of this polygon so they won't be drawn separately
+		for (int i = 0; i < points.length; i++) {
+			int next = (i + 1) % points.length;
+			Coords c1 = points[i].getCoordsInD2();
+			Coords c2 = points[next].getCoordsInD2();
+			double x1 = c1.getX() / c1.getZ();
+			double y1 = c1.getY() / c1.getZ();
+			double x2 = c2.getX() / c2.getZ();
+			double y2 = c2.getY() / c2.getZ();
+			// Register segment in both directions
+			polygonSegments.add(segmentKey(x1, y1, x2, y2));
+			polygonSegments.add(segmentKey(x2, y2, x1, y1));
+		}
+
 		startBeamer(codeFilledObject);
-		codeFilledObject.append("\\fill");
+		// Use \draw to include outline, with fill options
+		codeFilledObject.append("\\draw");
 		String s = lineOptionCode(geo, true);
 		if (s.length() != 0) {
 			s = "[" + s + "] ";
 			codeFilledObject.append(s);
 		}
-		GeoPointND[] points = geo.getPoints();
 		for (int i = 0; i < points.length; i++) {
 			Coords coords = points[i].getCoordsInD2();
 			double x = coords.getX(), y = coords.getY(), z = coords.getZ();
 			x = x / z;
 			y = y / z;
-			writePoint(x, y, codeFilledObject);
+			writePointOrName(x, y, codeFilledObject);
 			codeFilledObject.append(" -- ");
 		}
 		codeFilledObject.append("cycle;\n");
@@ -1721,9 +1780,9 @@ public class GeoGebraToPgf extends GeoGebraExport {
 			code.append(s);
 		}
 		code.append("] ");
-		writePoint(x1, y1, code);
+		writePointOrName(x1, y1, code);
 		code.append(" -- ");
-		writePoint(x2, y2, code);
+		writePoint(x2, y2, code);  // endpoint is not a named point
 		code.append(";\n");
 		endBeamer(code);
 	}
@@ -1959,6 +2018,10 @@ public class GeoGebraToPgf extends GeoGebraExport {
 			double x = A[0];
 			double y = A[1];
 
+			// Register the point for named coordinate output
+			String pointLabel = gp.getLabelSimple();
+			registerPoint(pointLabel, x, y);
+
 			GColor dotcolor = gp.getObjectColor();
 			double dotsize = gp.getPointSize();
 			int dotstyle = gp.getPointStyle();
@@ -1973,19 +2036,19 @@ public class GeoGebraToPgf extends GeoGebraExport {
 				codePoint.append("\\draw [color=");
 				colorCode(dotcolor, codePoint);
 				codePoint.append("] ");
-				writePoint(x, y, codePoint);
+				writePointOrName(x, y, codePoint);
 				codePoint.append(" circle (");
-				codePoint.append(dotsize / 2);
+				codePoint.append(formatRadius(dotsize / 2));
 				codePoint.append("pt);\n");
 			} else if (dotstyle == EuclidianStyleConstants.POINT_STYLE_CROSS) {
 				codePoint.append("\\draw [color=");
 				colorCode(dotcolor, codePoint);
 				codePoint.append("] ");
-				writePoint(x, y, codePoint);
+				writePointOrName(x, y, codePoint);
 				codePoint.append("-- ++(-");
-				codePoint.append(dotsize / 2);
+				codePoint.append(formatRadius(dotsize / 2));
 				codePoint.append("pt,-");
-				codePoint.append(dotsize / 2);
+				codePoint.append(formatRadius(dotsize / 2));
 				codePoint.append("pt) -- ++(");
 				codePoint.append(dotsize);
 				codePoint.append("pt,");
@@ -2001,69 +2064,69 @@ public class GeoGebraToPgf extends GeoGebraExport {
 				codePoint.append("\\draw [color=");
 				colorCode(dotcolor, codePoint);
 				codePoint.append("] ");
-				writePoint(x, y, codePoint);
+				writePointOrName(x, y, codePoint);
 				codePoint.append(" ++(-");
-				codePoint.append(dotsize / 2);
+				codePoint.append(formatRadius(dotsize / 2));
 				codePoint.append("pt,0 pt) -- ++(");
-				codePoint.append(dotsize / 2);
+				codePoint.append(formatRadius(dotsize / 2));
 				codePoint.append("pt,");
-				codePoint.append(dotsize / 2);
+				codePoint.append(formatRadius(dotsize / 2));
 				codePoint.append("pt)--++(");
 
-				codePoint.append(dotsize / 2);
+				codePoint.append(formatRadius(dotsize / 2));
 				codePoint.append("pt,-");
-				codePoint.append(dotsize / 2);
+				codePoint.append(formatRadius(dotsize / 2));
 				codePoint.append("pt)--++(-");
 
-				codePoint.append(dotsize / 2);
+				codePoint.append(formatRadius(dotsize / 2));
 				codePoint.append("pt,-");
-				codePoint.append(dotsize / 2);
+				codePoint.append(formatRadius(dotsize / 2));
 				codePoint.append("pt)--++(-");
 
-				codePoint.append(dotsize / 2);
+				codePoint.append(formatRadius(dotsize / 2));
 				codePoint.append("pt,");
-				codePoint.append(dotsize / 2);
+				codePoint.append(formatRadius(dotsize / 2));
 				codePoint.append("pt);\n");
 			} else if (dotstyle == EuclidianStyleConstants.POINT_STYLE_FILLED_DIAMOND) {
 				codePoint.append("\\draw [fill=");
 				colorCode(dotcolor, codePoint);
 				codePoint.append("] ");
-				writePoint(x, y, codePoint);
+				writePointOrName(x, y, codePoint);
 				codePoint.append(" ++(-");
-				codePoint.append(dotsize / 2);
+				codePoint.append(formatRadius(dotsize / 2));
 				codePoint.append("pt,0 pt) -- ++(");
-				codePoint.append(dotsize / 2);
+				codePoint.append(formatRadius(dotsize / 2));
 				codePoint.append("pt,");
-				codePoint.append(dotsize / 2);
+				codePoint.append(formatRadius(dotsize / 2));
 				codePoint.append("pt)--++(");
 
-				codePoint.append(dotsize / 2);
+				codePoint.append(formatRadius(dotsize / 2));
 				codePoint.append("pt,-");
-				codePoint.append(dotsize / 2);
+				codePoint.append(formatRadius(dotsize / 2));
 				codePoint.append("pt)--++(-");
 
-				codePoint.append(dotsize / 2);
+				codePoint.append(formatRadius(dotsize / 2));
 				codePoint.append("pt,-");
-				codePoint.append(dotsize / 2);
+				codePoint.append(formatRadius(dotsize / 2));
 				codePoint.append("pt)--++(-");
 
-				codePoint.append(dotsize / 2);
+				codePoint.append(formatRadius(dotsize / 2));
 				codePoint.append("pt,");
-				codePoint.append(dotsize / 2);
+				codePoint.append(formatRadius(dotsize / 2));
 				codePoint.append("pt);\n");
 			} else if (dotstyle == EuclidianStyleConstants.POINT_STYLE_PLUS) {
 				codePoint.append("\\draw [color=");
 				colorCode(dotcolor, codePoint);
 				codePoint.append("] ");
-				writePoint(x, y, codePoint);
+				writePointOrName(x, y, codePoint);
 				codePoint.append("-- ++(-");
-				codePoint.append(dotsize / 2);
+				codePoint.append(formatRadius(dotsize / 2));
 				codePoint.append("pt,0 pt) -- ++(");
 				codePoint.append(dotsize);
 				codePoint.append("pt,0 pt) ++(-");
-				codePoint.append(dotsize / 2);
+				codePoint.append(formatRadius(dotsize / 2));
 				codePoint.append("pt,-");
-				codePoint.append(dotsize / 2);
+				codePoint.append(formatRadius(dotsize / 2));
 				codePoint.append("pt) -- ++(0 pt,");
 				codePoint.append(dotsize);
 				codePoint.append("pt);\n");
@@ -2159,13 +2222,32 @@ public class GeoGebraToPgf extends GeoGebraExport {
 
 			// default is the circle point style
 			else {
-				codePoint.append("\\draw [fill=");
-				colorCode(dotcolor, codePoint);
-				codePoint.append("] ");
-				writePoint(x, y, codePoint);
-				codePoint.append(" circle (");
-				codePoint.append(dotsize / 2);
-				codePoint.append("pt);\n");
+				// draw point
+				int red = dotcolor.getRed();
+				int green = dotcolor.getGreen();
+				int blue = dotcolor.getBlue();
+				String label = gp.getCaption(getStringTemplate());
+				String nodePosition = getNodePosition(gp);
+				if (red == 127 && green == 0 && blue == 255) {
+					// purple points are rendered as labels only
+					codePoint.append("\\draw ");
+					writePointOrName(x, y, codePoint);
+					codePoint.append(" node [" + nodePosition + "] {$" + label + "$};\n");
+				} else {
+					codePoint.append("\\draw [fill=");
+					colorCode(dotcolor, codePoint);
+					codePoint.append("] ");
+					writePointOrName(x, y, codePoint);
+					codePoint.append(" circle (");
+					codePoint.append(formatRadius(dotsize / 2));
+					codePoint.append("pt)");
+
+					if (gp.isLabelVisible()) {
+						codePoint.append(" node [" + nodePosition + "] {$" + label + "$}");
+					}
+
+					codePoint.append(";\n");
+				}
 			}
 			endBeamer(codePoint);
 		}
@@ -2346,6 +2428,7 @@ public class GeoGebraToPgf extends GeoGebraExport {
 
 	@Override
 	protected void drawGeoSegment(GeoSegmentND geo) {
+		// Store segment for later chain processing
 		double[] A = new double[3];
 		double[] B = new double[3];
 		GeoPointND pointStart = geo.getStartPoint();
@@ -2353,24 +2436,19 @@ public class GeoGebraToPgf extends GeoGebraExport {
 		pointStart.getInhomCoords(A);
 		pointEnd.getInhomCoords(B);
 
-		startBeamer(code);
-		code.append("\\draw ");
-		String s = lineOptionCode(geo, true);
-		if (s.length() != 0) {
-			s = "[" + s + "] ";
+		// Skip if this segment is part of a polygon (already drawn as part of the polygon path)
+		if (isPolygonSegment(A[0], A[1], B[0], B[1])) {
+			return;
 		}
-		code.append(s);
 
-		// assume 2D (3D check done earlier)
-		writePoint(A[0], A[1], code);
-		code.append("-- ");
-		writePoint(B[0], B[1], code);
-		code.append(";\n");
+		String startKey = coordKey(A[0], A[1]);
+		String endKey = coordKey(B[0], B[1]);
+		String lineOpts = lineOptionCode(geo, true);
+		String label = geo.isLabelVisible() ? geo.getCaption(getStringTemplate()) : null;
 		int deco = geo.getDecorationType();
-		if (deco != GeoElementND.DECORATION_NONE) {
-			mark(A, B, deco, geo);
-		}
-		endBeamer(code);
+
+		pendingSegments.add(new SegmentInfo(A, B, startKey, endKey, lineOpts, label,
+				geo.isLabelVisible(), deco, geo));
 	}
 
 	@Override
@@ -2447,7 +2525,7 @@ public class GeoGebraToPgf extends GeoGebraExport {
 				s = "[" + s + "] ";
 			}
 			code.append(s);
-			writePoint(x1, y1, code);
+			writePointOrName(x1, y1, code);
 			code.append(" -- ");
 			writePoint(x1, sup, code);
 			code.append(";\n");
@@ -2648,6 +2726,264 @@ public class GeoGebraToPgf extends GeoGebraExport {
 	}
 
 	/**
+	 * Formats a point radius/size for TikZ output, removing unnecessary decimals.
+	 * E.g., 2.0 becomes "2", 2.5 becomes "2.5"
+	 */
+	private String formatRadius(double r) {
+		if (r == (int) r) {
+			return String.valueOf((int) r);
+		}
+		return String.valueOf(r);
+	}
+
+	/**
+	 * Creates a coordinate key from x,y values for lookup in pointNames map
+	 */
+	private String coordKey(double x, double y) {
+		return format(x) + "," + format(y);
+	}
+
+	/**
+	 * Creates a segment key from start and end coordinates for polygon segment tracking
+	 */
+	private String segmentKey(double x1, double y1, double x2, double y2) {
+		return coordKey(x1, y1) + "->" + coordKey(x2, y2);
+	}
+
+	/**
+	 * Checks if a segment is part of a polygon (and thus already drawn)
+	 */
+	private boolean isPolygonSegment(double x1, double y1, double x2, double y2) {
+		return polygonSegments.contains(segmentKey(x1, y1, x2, y2));
+	}
+
+	/**
+	 * Process pending segments, find chains of connected segments with same style,
+	 * and output them as single \draw commands.
+	 */
+	private void processSegmentChains() {
+		if (pendingSegments.isEmpty()) {
+			return;
+		}
+
+		// Build adjacency map: point key -> list of segments that have this point as endpoint
+		HashMap<String, ArrayList<SegmentInfo>> adjacency = new HashMap<>();
+		for (SegmentInfo seg : pendingSegments) {
+			adjacency.computeIfAbsent(seg.startKey, k -> new ArrayList<>()).add(seg);
+			adjacency.computeIfAbsent(seg.endKey, k -> new ArrayList<>()).add(seg);
+		}
+
+		// Process each unused segment
+		for (SegmentInfo startSeg : pendingSegments) {
+			if (startSeg.used) {
+				continue;
+			}
+
+			// Build a chain starting from this segment
+			ArrayList<SegmentInfo> chain = new ArrayList<>();
+			chain.add(startSeg);
+			startSeg.used = true;
+
+			String currentLineOpts = startSeg.lineOptions;
+
+			// Extend chain backwards from start point
+			String backKey = startSeg.startKey;
+			boolean backwardReversed = true; // first segment's start is at the back
+			while (true) {
+				SegmentInfo next = findConnectedSegment(adjacency, backKey, currentLineOpts);
+				if (next == null) {
+					break;
+				}
+				next.used = true;
+				chain.add(0, next); // add to front
+				// Determine which end to continue from
+				if (next.endKey.equals(backKey)) {
+					backKey = next.startKey;
+				} else {
+					backKey = next.endKey;
+				}
+			}
+
+			// Extend chain forwards from end point
+			String forwardKey = startSeg.endKey;
+			while (true) {
+				SegmentInfo next = findConnectedSegment(adjacency, forwardKey, currentLineOpts);
+				if (next == null) {
+					break;
+				}
+				next.used = true;
+				chain.add(next); // add to back
+				// Determine which end to continue from
+				if (next.startKey.equals(forwardKey)) {
+					forwardKey = next.endKey;
+				} else {
+					forwardKey = next.startKey;
+				}
+			}
+
+			// Output the chain
+			outputSegmentChain(chain);
+		}
+	}
+
+	/**
+	 * Find an unused segment connected to the given point with matching line options
+	 */
+	private SegmentInfo findConnectedSegment(HashMap<String, ArrayList<SegmentInfo>> adjacency,
+			String pointKey, String lineOpts) {
+		ArrayList<SegmentInfo> connected = adjacency.get(pointKey);
+		if (connected == null) {
+			return null;
+		}
+		for (SegmentInfo seg : connected) {
+			if (!seg.used && seg.lineOptions.equals(lineOpts)) {
+				// Check this segment connects at the given point
+				if (seg.startKey.equals(pointKey) || seg.endKey.equals(pointKey)) {
+					return seg;
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Output a chain of segments as a single \draw command
+	 */
+	private void outputSegmentChain(ArrayList<SegmentInfo> chain) {
+		if (chain.isEmpty()) {
+			return;
+		}
+
+		// Build ordered list of points from the chain
+		ArrayList<double[]> points = new ArrayList<>();
+		ArrayList<SegmentInfo> orderedSegs = new ArrayList<>();
+
+		// Start with first segment
+		SegmentInfo first = chain.get(0);
+		if (chain.size() == 1) {
+			points.add(first.start);
+			points.add(first.end);
+			orderedSegs.add(first);
+		} else {
+			// Determine orientation of first segment based on connection to second
+			SegmentInfo second = chain.get(1);
+			boolean firstReversed = false;
+			if (first.endKey.equals(second.startKey) || first.endKey.equals(second.endKey)) {
+				// first.end connects to second, so first is in correct order
+				firstReversed = false;
+			} else {
+				// first.start connects to second, so first is reversed
+				firstReversed = true;
+			}
+
+			if (firstReversed) {
+				points.add(first.end);
+				points.add(first.start);
+			} else {
+				points.add(first.start);
+				points.add(first.end);
+			}
+			orderedSegs.add(first);
+
+			// Add remaining segments
+			for (int i = 1; i < chain.size(); i++) {
+				SegmentInfo seg = chain.get(i);
+				double[] lastPoint = points.get(points.size() - 1);
+				String lastKey = coordKey(lastPoint[0], lastPoint[1]);
+
+				if (seg.startKey.equals(lastKey)) {
+					points.add(seg.end);
+				} else {
+					points.add(seg.start);
+				}
+				orderedSegs.add(seg);
+			}
+		}
+
+		// Check if chain forms a cycle
+		double[] firstPt = points.get(0);
+		double[] lastPt = points.get(points.size() - 1);
+		boolean isCycle = coordKey(firstPt[0], firstPt[1]).equals(coordKey(lastPt[0], lastPt[1]));
+		if (isCycle) {
+			points.remove(points.size() - 1); // remove duplicate last point
+		}
+
+		// Output the path
+		startBeamer(code);
+		code.append("\\draw ");
+		String lineOpts = chain.get(0).lineOptions;
+		if (lineOpts.length() != 0) {
+			code.append("[").append(lineOpts).append("] ");
+		}
+
+		for (int i = 0; i < points.size(); i++) {
+			double[] pt = points.get(i);
+			writePointOrName(pt[0], pt[1], code);
+
+			if (i < points.size() - 1) {
+				code.append(" -- ");
+				// Add label for the segment if it has one
+				if (i < orderedSegs.size() && orderedSegs.get(i).hasLabel) {
+					code.append("node[auto, swap] {$").append(orderedSegs.get(i).label).append("$} ");
+				}
+			}
+		}
+
+		if (isCycle) {
+			code.append(" -- cycle");
+		}
+		code.append(";\n");
+
+		// Draw decorations for segments that have them
+		for (SegmentInfo seg : chain) {
+			if (seg.decoration != GeoElementND.DECORATION_NONE) {
+				mark(seg.start, seg.end, seg.decoration, seg.geo);
+			}
+		}
+
+		endBeamer(code);
+	}
+
+	/**
+	 * Registers a named point and outputs its coordinate definition
+	 * @param name the point's label
+	 * @param x X coordinate
+	 * @param y Y coordinate
+	 */
+	private void registerPoint(String name, double x, double y) {
+		if (name == null || name.isEmpty()) {
+			return;
+		}
+		String key = coordKey(x, y);
+		if (!pointNames.containsKey(key)) {
+			pointNames.put(key, name);
+			codeCoordinates.append("\\coordinate (");
+			codeCoordinates.append(name);
+			codeCoordinates.append(") at ");
+			writePoint(x, y, codeCoordinates);
+			codeCoordinates.append(";\n");
+		}
+	}
+
+	/**
+	 * Writes a point reference - uses named coordinate if available, otherwise inline coordinates
+	 * @param x X coordinate
+	 * @param y Y coordinate
+	 * @param sb StringBuilder to append to
+	 */
+	private void writePointOrName(double x, double y, StringBuilder sb) {
+		String key = coordKey(x, y);
+		String name = pointNames.get(key);
+		if (name != null) {
+			sb.append("(");
+			sb.append(name);
+			sb.append(")");
+		} else {
+			writePoint(x, y, sb);
+		}
+	}
+
+	/**
 	 * @param geo
 	 *            element
 	 * @param transparency
@@ -2656,23 +2992,25 @@ public class GeoGebraToPgf extends GeoGebraExport {
 	 */
 	public String lineOptionCode(GeoElementND geo, boolean transparency) {
 		StringBuilder sb = new StringBuilder();
-		int linethickness = geo.getLineThickness();
 		int linestyle = geo.getLineType();
+		boolean coma = false;
 
 		Info info = new Info(geo);
 
-		// removed: default is different in GeoGebra vs Tikz
-		// bracket needed
-		sb.append("line width=");
-		sb.append(format(linethickness / 2.0 * 0.8));
-		sb.append("pt");
-
 		if (linestyle != EuclidianStyleConstants.DEFAULT_LINE_TYPE) {
-			sb.append(",");
+			if (coma) {
+				sb.append(",");
+			}
 			linestyleCode(linestyle, sb);
+			coma = true;
 		}
-		if (!info.getLinecolor().equals(GColor.BLACK)) {
-			sb.append(",");
+
+		if (!(isBlack(geo.getObjectColor()))) {
+			if (coma) {
+				sb.append(",");
+			} else {
+				coma = true;
+			}
 			if (transparency && geo.isFillable()
 					&& info.getFillType() == FillType.IMAGE) {
 				sb.append("pattern ");
@@ -2786,10 +3124,104 @@ public class GeoGebraToPgf extends GeoGebraExport {
 		}
 	}
 
+	private boolean compareColor(int r, int g, int b, int r2, int g2, int b2) {
+		return ((r == r2) && (g == g2) && (b == b2));
+	}
+
+	private boolean isBlack(GColor c0) {
+		int red = c0.getRed();
+		int green = c0.getGreen();
+		int blue = c0.getBlue();
+
+		if ((c0.equals(GColor.BLACK))
+				|| (compareColor(red, green, blue, 68, 68, 68)) // fixed points
+				|| (compareColor(red, green, blue, 127, 0, 255))) { // purple points treated as black
+			return true;
+		}
+
+		return false;
+	}
+
+	private String getNodePosition(GeoPointND gp) {
+		DrawableND geo = euclidianView.getDrawableFor(gp);
+		if (geo == null) {
+			return "above right";
+		}
+		double[] A = new double[3];
+		gp.getInhomCoords(A);
+		double x = A[0];
+		double y = A[1];
+
+		double xLabel = geo.getLabelX();
+		double yLabel = geo.getLabelY();
+		xLabel = euclidianView.toRealWorldCoordX(Math.round(xLabel));
+		yLabel = euclidianView.toRealWorldCoordY(Math.round(yLabel));
+
+		double below = ((x) - xLabel) * ((x) - xLabel)
+				+ ((y - 1) - yLabel) * ((y - 1) - yLabel);
+		double above = ((x) - xLabel) * ((x) - xLabel)
+				+ ((y + 1) - yLabel) * ((y + 1) - yLabel);
+		double left = ((x - 1) - xLabel) * ((x - 1) - xLabel)
+				+ ((y) - yLabel) * ((y) - yLabel);
+		double right = ((x + 1) - xLabel) * ((x + 1) - xLabel)
+				+ ((y) - yLabel) * ((y) - yLabel);
+		double aboveright = ((x + 0.71) - xLabel) * ((x + 0.71) - xLabel)
+				+ ((y + 0.71) - yLabel) * ((y + 0.71) - yLabel);
+		double belowright = ((x + 0.71) - xLabel) * ((x + 0.71) - xLabel)
+				+ ((y - 0.71) - yLabel) * ((y - 0.71) - yLabel);
+		double aboveleft = ((x - 0.71) - xLabel) * ((x - 0.71) - xLabel)
+				+ ((y + 0.71) - yLabel) * ((y + 0.71) - yLabel);
+		double belowleft = ((x - 0.71) - xLabel) * ((x - 0.71) - xLabel)
+				+ ((y - 0.71) - yLabel) * ((y - 0.71) - yLabel);
+
+		double minDist = below;
+		if (above < minDist) {
+			minDist = above;
+		}
+		if (left < minDist) {
+			minDist = left;
+		}
+		if (right < minDist) {
+			minDist = right;
+		}
+
+		if (belowright < minDist) {
+			minDist = belowright;
+		}
+		if (aboveright < minDist) {
+			minDist = aboveright;
+		}
+		if (belowleft < minDist) {
+			minDist = belowleft;
+		}
+		if (aboveleft < minDist) {
+			minDist = aboveleft;
+		}
+
+		if (minDist == above) {
+			return "above";
+		} else if (minDist == below) {
+			return "below";
+		} else if (minDist == left) {
+			return "left";
+		} else if (minDist == right) {
+			return "right";
+		} else if (minDist == aboveright) {
+			return "above right";
+		} else if (minDist == belowright) {
+			return "below right";
+		} else if (minDist == aboveleft) {
+			return "above left";
+		} else if (minDist == belowleft) {
+			return "below left";
+		}
+		return "below";
+	}
+
 	/**
 	 * Append the name color to StringBuilder sb It will create a custom color,
 	 * if this color hasn't be defined yet
-	 * 
+	 *
 	 * @param c0
 	 *            The chosen color
 	 * @param sb
@@ -2850,7 +3282,10 @@ public class GeoGebraToPgf extends GeoGebraExport {
 			}
 			sb.append(colorname);
 		} else {
-			if (c0.equals(GColor.BLACK)) {
+			int red = c0.getRed();
+			int green = c0.getGreen();
+			int blue = c0.getBlue();
+			if (isBlack(c0)) {
 				sb.append("black");
 				return;
 			}
@@ -2858,9 +3293,6 @@ public class GeoGebraToPgf extends GeoGebraExport {
 			if (customColor.containsKey(c0)) {
 				colorname = customColor.get(c0);
 			} else {
-				int red = c0.getRed();
-				int green = c0.getGreen();
-				int blue = c0.getBlue();
 				colorname = createCustomColor(red, green, blue);
 				// Example: \definecolor{orange}{rgb}{1,0.5,0}
 				if (format == GeoGebraToPgf.FORMAT_LATEX
@@ -2914,9 +3346,9 @@ public class GeoGebraToPgf extends GeoGebraExport {
 			Coords coords = path[i].getInhomCoords();
 			double x1 = coords.getX();
 			double y1 = coords.getY();
-			writePoint(x1, y1, str);
+			writePointOrName(x1, y1, str);
 			if (i != path.length - 1) {
-				str.append("-- ");
+				str.append(" -- ");
 			}
 		}
 		str.append(";\n");
