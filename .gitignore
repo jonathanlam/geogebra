@@ -24,6 +24,9 @@ desktop.ini
 # Claude
 .claude/
 
+# Local project folder
+GeoGebra/
+
 # Local configuration
 local.properties
 *.local

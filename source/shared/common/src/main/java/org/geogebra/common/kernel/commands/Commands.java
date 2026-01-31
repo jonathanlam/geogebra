@@ -95,6 +95,8 @@ public enum Commands implements CommandsConstants,
 
 	Segment(TABLE_GEOMETRY),
 
+	Altitude(TABLE_GEOMETRY),
+
 	Slope(TABLE_GEOMETRY),
 
 	Angle(TABLE_GEOMETRY),
@@ -152,6 +154,8 @@ public enum Commands implements CommandsConstants,
 	TriangleCenter(TABLE_GEOMETRY),
 
 	Incenter(TABLE_GEOMETRY),
+
+	Excenter(TABLE_GEOMETRY),
 
 	Circumcenter(TABLE_GEOMETRY),
 

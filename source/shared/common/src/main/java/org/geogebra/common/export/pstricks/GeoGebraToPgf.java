@@ -41,6 +41,7 @@ import org.geogebra.common.kernel.algos.AlgoBoxPlot;
 import org.geogebra.common.kernel.algos.AlgoElement;
 import org.geogebra.common.kernel.algos.AlgoFunctionAreaSums;
 import org.geogebra.common.kernel.algos.AlgoIntersectAbstract;
+import org.geogebra.common.kernel.algos.AlgoIntersectLines;
 import org.geogebra.common.kernel.algos.AlgoSlope;
 import org.geogebra.common.kernel.arithmetic.ExpressionNode;
 import org.geogebra.common.kernel.arithmetic.ExpressionNodeConstants.StringType;
@@ -171,7 +172,7 @@ public class GeoGebraToPgf extends GeoGebraExport {
 			codePreamble.append("\\pgfplotsset{compat=1.15");
 
 			codePreamble.append(
-					"}\n\\usepackage{mathrsfs}\n\\usetikzlibrary{arrows}\n\\pagestyle{empty}\n");
+					"}\n\\usepackage{mathrsfs}\n\\usetikzlibrary{arrows,calc,intersections}\n\\pagestyle{empty}\n");
 			codeBeginDoc.append(
 					"\\begin{tikzpicture}[line cap=round,line join=round,>=triangle 45,");
 
@@ -182,7 +183,7 @@ public class GeoGebraToPgf extends GeoGebraExport {
 			codePreamble.append("%Uncomment next line if XeTeX is used\n");
 			codePreamble.append("%\\def\\pgfsysdriver{pgfsys-xetex.def}\n\n");
 			codePreamble.append("\\input tikz.tex\n");
-			codePreamble.append("\\usetikzlibrary{arrows}\n");
+			codePreamble.append("\\usetikzlibrary{arrows,calc,intersections}\n");
 			codePreamble.append("\\baselineskip=");
 			codePreamble.append(frame.getFontSize());
 			codePreamble.append("pt\n\\hsize=6.3truein\n\\vsize=8.7truein\n");
@@ -198,7 +199,7 @@ public class GeoGebraToPgf extends GeoGebraExport {
 					.append("\\setupbodyfont[").append(frame.getFontSize()).append("pt]\n");
 			codePreamble.append("\\usemodule[tikz]\n");
 			codePreamble.append(
-					"\\usetikzlibrary[arrows]\n\\setuppagenumbering[location=]\n");
+					"\\usetikzlibrary[arrows,calc,intersections]\n\\setuppagenumbering[location=]\n");
 
 			codeBeginDoc.append("\\startTEXpage\n\\starttikzpicture[");
 			codeBeginDoc.append("line cap=round,line join=round,>=triangle 45,x=");
@@ -209,7 +210,7 @@ public class GeoGebraToPgf extends GeoGebraExport {
 		} else if (format == GeoGebraToPgf.FORMAT_BEAMER) {
 			codePreamble.append("\\documentclass[").append(frame.getFontSize())
 					.append("pt]{beamer}\n")
-					.append("\\usepackage{tikz}\n\\usetikzlibrary{arrows}\n\\pagestyle{empty}\n");
+					.append("\\usepackage{tikz}\n\\usetikzlibrary{arrows,calc,intersections}\n\\pagestyle{empty}\n");
 			codeBeginDoc.append("\\begin{frame}\n");
 			codeBeginDoc.append(
 					"\\begin{tikzpicture}[line cap=round,line join=round,>=triangle 45,x=");
@@ -784,16 +785,22 @@ public class GeoGebraToPgf extends GeoGebraExport {
 			x[6] = m[0];
 			x[7] = m[1];
 			startBeamer(codeFilledObject);
+			String angleLabel = geo.getLabelSimple();
+			if (angleLabel != null && !angleLabel.isEmpty()) {
+				codeFilledObject.append("% Right angle ").append(angleLabel).append("\n");
+			}
 			codeFilledObject.append("\\draw");
 			String s = lineOptionCode(geo, true);
 			if (s.length() != 0) {
 				codeFilledObject.append("[").append(s).append("] ");
 			}
-			for (int i = 0; i < 4; i++) {
-				writePoint(x[2 * i], x[2 * i + 1], codeFilledObject);
-				codeFilledObject.append(" -- ");
-			}
-			codeFilledObject.append("cycle; \n");
+			// Draw only the two lines forming the right angle marker (not the full square)
+			writePoint(x[0], x[1], codeFilledObject);
+			codeFilledObject.append(" -- ");
+			writePoint(x[2], x[3], codeFilledObject);
+			codeFilledObject.append(" -- ");
+			writePoint(x[4], x[5], codeFilledObject);
+			codeFilledObject.append(";\n");
 			endBeamer(codeFilledObject);
 		}
 		// draw arc for the angle
@@ -805,6 +812,10 @@ public class GeoGebraToPgf extends GeoGebraExport {
 				angStDeg = angStDeg - 360;
 			}
 			startBeamer(codeFilledObject);
+			String angleLabel = geo.getLabelSimple();
+			if (angleLabel != null && !angleLabel.isEmpty()) {
+				codeFilledObject.append("% Angle ").append(angleLabel).append("\n");
+			}
 			codeFilledObject.append("\\draw [shift={");
 			writePoint(m[0], m[1], codeFilledObject);
 			codeFilledObject.append("}");
@@ -1355,33 +1366,54 @@ public class GeoGebraToPgf extends GeoGebraExport {
 			code.append(" -- cycle ;\n");
 		} else if (geo
 				.getConicPartType() == GeoConicNDConstants.CONIC_PART_ARC) {
-			StringBuilder sb1 = new StringBuilder();
-			sb1.append(format(r1));
-			sb1.append("*cos(\\t r)");
-			StringBuilder sb2 = new StringBuilder();
-			sb2.append(format(r2));
-			sb2.append("*sin(\\t r)");
-			code.append(" plot[domain=");
-			code.append(format(startAngle));
-			code.append(":");
-			code.append(format(endAngle));
-			code.append(",variable=\\t]({");
-			code.append(format(m11));
-			code.append("*");
-			code.append(sb1);
-			code.append("+");
-			code.append(format(m12));
-			code.append("*");
-			code.append(sb2);
-			code.append("},{");
-			code.append(format(m21));
-			code.append("*");
-			code.append(sb1);
-			code.append("+");
-			code.append(format(m22));
-			code.append("*");
-			code.append(sb2);
-			code.append("});\n");
+			// Check if this is a simple circular arc (no rotation/shear, equal radii)
+			boolean isSimpleCircularArc = (m11 == 1 && m22 == 1 && m12 == 0 && m21 == 0
+					&& Math.abs(r1 - r2) < 0.001);
+			if (isSimpleCircularArc) {
+				// Use cleaner TikZ arc syntax: (startAngle:r) arc (startAngle:endAngle:r)
+				double startDeg = Math.toDegrees(startAngle);
+				double endDeg = Math.toDegrees(endAngle);
+				code.append(" (");
+				code.append(format(startDeg));
+				code.append(":");
+				code.append(format(r1));
+				code.append(") arc (");
+				code.append(format(startDeg));
+				code.append(":");
+				code.append(format(endDeg));
+				code.append(":");
+				code.append(format(r1));
+				code.append(");\n");
+			} else {
+				// Use parametric plot for general elliptical/rotated arcs
+				StringBuilder sb1 = new StringBuilder();
+				sb1.append(format(r1));
+				sb1.append("*cos(\\t r)");
+				StringBuilder sb2 = new StringBuilder();
+				sb2.append(format(r2));
+				sb2.append("*sin(\\t r)");
+				code.append(" plot[domain=");
+				code.append(format(startAngle));
+				code.append(":");
+				code.append(format(endAngle));
+				code.append(",variable=\\t]({");
+				code.append(format(m11));
+				code.append("*");
+				code.append(sb1);
+				code.append("+");
+				code.append(format(m12));
+				code.append("*");
+				code.append(sb2);
+				code.append("},{");
+				code.append(format(m21));
+				code.append("*");
+				code.append(sb1);
+				code.append("+");
+				code.append(format(m22));
+				code.append("*");
+				code.append(sb2);
+				code.append("});\n");
+			}
 		}
 		endBeamer(code);
 	}
@@ -1803,9 +1835,9 @@ public class GeoGebraToPgf extends GeoGebraExport {
 			build.append("\\draw");
 			String s = lineOptionCode(geo, true);
 			if (s.length() != 0) {
-				s = " [" + s + "] ";
+				build.append(" [").append(s).append("]");
 			}
-			build.append(s);
+			build.append(" ");
 			writePoint(x, y, build);
 			build.append(" circle (");
 			String tmpr = format(r * xunit);
@@ -1826,9 +1858,9 @@ public class GeoGebraToPgf extends GeoGebraExport {
 			build.append("\\draw");
 			String s = lineOptionCode(geo, true);
 			if (s.length() != 0) {
-				s = " [" + s + "] ";
+				build.append(" [").append(s).append("]");
 			}
-			build.append(s);
+			build.append(" ");
 			writePoint(x1, y1, build);
 			double r1 = geo.getHalfAxes()[0];
 			double r2 = geo.getHalfAxes()[1];
@@ -2028,7 +2060,7 @@ public class GeoGebraToPgf extends GeoGebraExport {
 			double y = A[1];
 
 			// Register the point for named coordinate output
-			registerPoint(pointLabel, x, y);
+			registerPoint(pointLabel, x, y, gp);
 
 			GColor dotcolor = gp.getObjectColor();
 			double dotsize = gp.getPointSize();
@@ -2958,12 +2990,14 @@ public class GeoGebraToPgf extends GeoGebraExport {
 	}
 
 	/**
-	 * Registers a named point and outputs its coordinate definition
+	 * Registers a named point and outputs its coordinate definition.
+	 * For intersection points of two lines/segments, uses TikZ intersection syntax.
 	 * @param name the point's label
 	 * @param x X coordinate
 	 * @param y Y coordinate
+	 * @param gp the GeoPoint (used to detect intersection points)
 	 */
-	private void registerPoint(String name, double x, double y) {
+	private void registerPoint(String name, double x, double y, GeoPointND gp) {
 		if (name == null || name.isEmpty()) {
 			return;
 		}
@@ -2973,6 +3007,35 @@ public class GeoGebraToPgf extends GeoGebraExport {
 			codeCoordinates.append("\\coordinate (");
 			codeCoordinates.append(name);
 			codeCoordinates.append(") at ");
+
+			// Check if this is an intersection of two lines/segments
+			AlgoElement algo = gp.getParentAlgorithm();
+			if (algo instanceof AlgoIntersectLines) {
+				AlgoIntersectLines intersectAlgo = (AlgoIntersectLines) algo;
+				GeoElement[] inputs = intersectAlgo.getInput();
+				if (inputs.length == 2
+						&& inputs[0] instanceof GeoSegmentND
+						&& inputs[1] instanceof GeoSegmentND) {
+					GeoSegmentND seg1 = (GeoSegmentND) inputs[0];
+					GeoSegmentND seg2 = (GeoSegmentND) inputs[1];
+					String start1 = seg1.getStartPoint().getLabelSimple();
+					String end1 = seg1.getEndPoint().getLabelSimple();
+					String start2 = seg2.getStartPoint().getLabelSimple();
+					String end2 = seg2.getEndPoint().getLabelSimple();
+					// Only use intersection syntax if all points have labels
+					if (start1 != null && end1 != null && start2 != null && end2 != null
+							&& !start1.isEmpty() && !end1.isEmpty()
+							&& !start2.isEmpty() && !end2.isEmpty()) {
+						codeCoordinates.append("(intersection of ");
+						codeCoordinates.append(start1).append("--").append(end1);
+						codeCoordinates.append(" and ");
+						codeCoordinates.append(start2).append("--").append(end2);
+						codeCoordinates.append(");\n");
+						return;
+					}
+				}
+			}
+			// Default: use explicit coordinates
 			writePoint(x, y, codeCoordinates);
 			codeCoordinates.append(";\n");
 		}
@@ -3300,6 +3363,14 @@ public class GeoGebraToPgf extends GeoGebraExport {
 			int blue = c0.getBlue();
 			if (isBlack(c0)) {
 				sb.append("black");
+				return;
+			}
+			// Check for gray-ish colors (R, G, B approximately equal)
+			int maxDiff = Math.max(Math.abs(red - green),
+					Math.max(Math.abs(green - blue), Math.abs(red - blue)));
+			int avg = (red + green + blue) / 3;
+			if (maxDiff <= 20 && avg >= 80 && avg <= 180) {
+				sb.append("gray");
 				return;
 			}
 			String colorname = "";

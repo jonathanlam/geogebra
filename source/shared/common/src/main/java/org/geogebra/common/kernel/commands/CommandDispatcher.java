@@ -575,6 +575,7 @@ public abstract class CommandDispatcher {
 			case AngularBisector:
 
 			case Segment:
+			case Altitude:
 			case Slope:
 			case Angle:
 			case InteriorAngles:
@@ -873,6 +874,7 @@ public abstract class CommandDispatcher {
 
 			case TriangleCenter:
 			case Incenter:
+			case Excenter:
 			case Circumcenter:
 			case Orthocenter:
 			case Barycenter:

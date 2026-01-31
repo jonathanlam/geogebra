@@ -96,6 +96,8 @@ public class BasicCommandProcessorFactory implements CommandProcessorFactory {
 
 		case Segment:
 			return new CmdSegment(kernel);
+		case Altitude:
+			return new CmdAltitude(kernel);
 		case Slope:
 			return new CmdSlope(kernel);
 		case Angle:
