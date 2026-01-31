@@ -22,6 +22,8 @@ import java.awt.SystemColor;
 import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.print.PageFormat;
 import java.io.File;
 import java.io.IOException;
@@ -47,6 +49,7 @@ import org.geogebra.common.main.App;
 import org.geogebra.common.util.StringUtil;
 import org.geogebra.common.util.debug.Log;
 import org.geogebra.desktop.export.PrintPreviewD;
+import org.geogebra.desktop.export.pstricks.PgfFrame;
 import org.geogebra.desktop.gui.GuiManagerD;
 import org.geogebra.desktop.gui.layout.DockManagerD;
 import org.geogebra.desktop.gui.layout.LayoutD;
@@ -138,6 +141,20 @@ public class GeoGebraMenuBar extends JMenuBar {
 		// "Help"
 		helpMenu = new HelpMenuD(app);
 		add(helpMenu);
+
+		// "TikZ" export shortcut
+		JMenu tikzMenu = new JMenu("TikZ");
+		tikzMenu.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mousePressed(MouseEvent e) {
+				try {
+					app.newGeoGebraToPgf(PgfFrame::new);
+				} catch (Exception ex) {
+					// PGF export not available
+				}
+			}
+		});
+		add(tikzMenu);
 
 		// support for right-to-left languages
 		app.setComponentOrientation(this);
