@@ -278,6 +278,9 @@ public final class EuclidianConstants {
 	/** Excenters of Triangle (all 3) */
 	public static final int MODE_EXCENTER = 85;
 
+	/** Incircle of Triangle */
+	public static final int MODE_INCIRCLE = 86;
+
 	/** Point on Object */
 	public static final int MODE_POINT_ON_OBJECT = 501;
 
@@ -667,6 +670,9 @@ public final class EuclidianConstants {
 
 		case EuclidianConstants.MODE_EXCENTER:
 			return "Excenter.Tool";
+
+		case EuclidianConstants.MODE_INCIRCLE:
+			return "Incircle.Tool";
 
 		case EuclidianConstants.MODE_INTERSECT:
 			return "Intersect";

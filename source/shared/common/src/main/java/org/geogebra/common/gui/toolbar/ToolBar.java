@@ -217,6 +217,8 @@ public class ToolBar {
 		sb.append(EuclidianConstants.MODE_COMPASSES);
 		sb.append(" ");
 		sb.append(EuclidianConstants.MODE_CIRCLE_THREE_POINTS);
+		sb.append(" ");
+		sb.append(EuclidianConstants.MODE_INCIRCLE);
 		sb.append(" , ");
 		sb.append(EuclidianConstants.MODE_SEMICIRCLE);
 		sb.append("  ");

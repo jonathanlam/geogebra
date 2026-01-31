@@ -76,6 +76,7 @@ import org.geogebra.common.kernel.Path;
 import org.geogebra.common.kernel.QuadraticEquationRepresentable;
 import org.geogebra.common.kernel.Region;
 import org.geogebra.common.kernel.StringTemplate;
+import org.geogebra.common.kernel.advanced.AlgoIncircle;
 import org.geogebra.common.kernel.algos.AlgoAltitude;
 import org.geogebra.common.kernel.algos.AlgoCirclePointRadius;
 import org.geogebra.common.kernel.algos.AlgoDispatcher;
@@ -2735,6 +2736,31 @@ public abstract class EuclidianController implements SpecialPointsListener {
 		return null;
 	}
 
+	/**
+	 * Creates incircle of a triangle from 3 points.
+	 * @param hits the hits from mouse click
+	 * @param selPreview whether this is selection preview mode
+	 * @return the created incircle, or null if not enough points selected
+	 */
+	protected final GeoElement[] incircle(Hits hits, boolean selPreview) {
+		if (hits.isEmpty()) {
+			return null;
+		}
+
+		addSelectedPoint(hits, 3, false, selPreview);
+
+		if (selPoints() == 3) {
+			GeoPointND[] points = getSelectedPointsND();
+			AlgoIncircle algo = new AlgoIncircle(
+					kernel.getConstruction(),
+					points[0], points[1], points[2]);
+			GeoElement circle = (GeoElement) algo.getCircle();
+			circle.setLabel(null);
+			return new GeoElement[] { circle };
+		}
+		return null;
+	}
+
 	protected final GeoElement[] midpoint(Hits hits, boolean selPreview) {
 		if (hits.isEmpty()) {
 			return null;
@@ -5353,6 +5379,10 @@ public abstract class EuclidianController implements SpecialPointsListener {
 
 		case EuclidianConstants.MODE_EXCENTER:
 			ret = excenters(hits, selectionPreview);
+			break;
+
+		case EuclidianConstants.MODE_INCIRCLE:
+			ret = incircle(hits, selectionPreview);
 			break;
 
 		// new line bisector
