@@ -86,4 +86,18 @@ public interface ExportSettings {
 
 	@MissingDoc
 	GeoNumeric getcbSlidersItem();
+
+	/**
+	 * @return true if only tikzpicture environment should be exported (no preamble/document)
+	 */
+	default boolean getTikzPictureOnly() {
+		return false;
+	}
+
+	/**
+	 * @return true if code inside tikzpicture should be indented
+	 */
+	default boolean getIndentCode() {
+		return false;
+	}
 }

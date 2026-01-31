@@ -33,6 +33,8 @@ public class PgfFrame extends ExportFrame {
 	final String[] format = { "LaTeX (article class)", "Plain TeX", "ConTeXt",
 			"LaTeX (beamer class)" };
 	private JCheckBox forceGnuplot;
+	private JCheckBox jcbTikzPictureOnly;
+	private JCheckBox jcbIndentCode;
 
 	/**
 	 * @param ggb2pgf PGF converters
@@ -47,6 +49,10 @@ public class PgfFrame extends ExportFrame {
 	protected void initGui() {
 		forceGnuplot = new JCheckBox(loc.getMenu("ForceGnuplotPgf"));
 		forceGnuplot.setSelected(false);
+		jcbTikzPictureOnly = new JCheckBox(loc.getMenu("PGFExport.TikzPictureOnly"));
+		jcbTikzPictureOnly.setSelected(false);
+		jcbIndentCode = new JCheckBox(loc.getMenu("PGFExport.IndentCode"));
+		jcbIndentCode.setSelected(true);
 		comboFormat = new JComboBox(format);
 		labelFormat = new JLabel(loc.getMenu("Format"));
 		js.getViewport().add(textarea);
@@ -134,19 +140,25 @@ public class PgfFrame extends ExportFrame {
 		panel.add(jcbGrayscale, new GridBagConstraints(0, 6, 2, 1, 1.0, 1.0,
 				GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
 				new Insets(5, 5, 5, 5), 0, 0));
-		panel.add(button, new GridBagConstraints(0, 7, 2, 1, 1.0, 1.0,
+		panel.add(jcbTikzPictureOnly, new GridBagConstraints(2, 6, 2, 1, 1.0, 1.0,
 				GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
 				new Insets(5, 5, 5, 5), 0, 0));
-		panel.add(buttonSave, new GridBagConstraints(2, 7, 1, 1, 1.0, 1.0,
+		panel.add(jcbIndentCode, new GridBagConstraints(0, 7, 2, 1, 1.0, 1.0,
 				GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
 				new Insets(5, 5, 5, 5), 0, 0));
-		panel.add(button_copy, new GridBagConstraints(3, 7, 1, 1, 1.0, 1.0,
+		panel.add(button, new GridBagConstraints(0, 8, 2, 1, 1.0, 1.0,
+				GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+				new Insets(5, 5, 5, 5), 0, 0));
+		panel.add(buttonSave, new GridBagConstraints(2, 8, 1, 1, 1.0, 1.0,
+				GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+				new Insets(5, 5, 5, 5), 0, 0));
+		panel.add(button_copy, new GridBagConstraints(3, 8, 1, 1, 1.0, 1.0,
 				GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
 				new Insets(5, 5, 5, 5), 0, 0));
 
 		// ///////////////////////////////
 		panel.add(js,
-				new GridBagConstraints(0, 8, 4, 5, 1.0, 15.0,
+				new GridBagConstraints(0, 9, 4, 5, 1.0, 15.0,
 						GridBagConstraints.CENTER, GridBagConstraints.BOTH,
 						new Insets(5, 5, 5, 5), 0, 0));
 
@@ -186,5 +198,15 @@ public class PgfFrame extends ExportFrame {
 	protected boolean isConTeXt() {
 		int id = comboFormat.getSelectedIndex();
 		return id == 2;
+	}
+
+	@Override
+	public boolean getTikzPictureOnly() {
+		return jcbTikzPictureOnly.isSelected();
+	}
+
+	@Override
+	public boolean getIndentCode() {
+		return jcbIndentCode.isSelected();
 	}
 }

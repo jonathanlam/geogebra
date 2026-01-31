@@ -97,6 +97,8 @@ public class GeoGebraToPgf extends GeoGebraExport {
 	private boolean forceGnuplot = false;
 	private boolean gnuplotWarning = false;
 	private boolean hatchWarning = false;
+	private boolean tikzPictureOnly = false;
+	private boolean indentCode = false;
 	/** Map from point coordinates (as string "x,y") to point name */
 	private HashMap<String, String> pointNames;
 	/** StringBuilder for coordinate definitions */
@@ -148,6 +150,8 @@ public class GeoGebraToPgf extends GeoGebraExport {
 
 		format = frame.getFormat();
 		forceGnuplot = frame.getGnuplot();
+		tikzPictureOnly = frame.getTikzPictureOnly();
+		indentCode = frame.getIndentCode();
 		// init unit variables
 		xunit = frame.getXUnit();
 		yunit = frame.getYUnit();
@@ -257,18 +261,26 @@ public class GeoGebraToPgf extends GeoGebraExport {
 			}
 
 			code.append("\\end{tikzpicture}\n");
-			if (isBeamer) {
-				code.append("\\end{frame}\n");
+			if (!tikzPictureOnly) {
+				if (isBeamer) {
+					code.append("\\end{frame}\n");
+				}
+				code.append("\\end{document}");
+				codeBeginDoc.insert(0, "\\begin{document}\n");
 			}
-			code.append("\\end{document}");
-
-			codeBeginDoc.insert(0, "\\begin{document}\n");
 		} else if (format == GeoGebraToPgf.FORMAT_PLAIN_TEX) {
-			code.append("\\endtikzpicture\n\\bye\n");
-
+			if (tikzPictureOnly) {
+				code.append("\\endtikzpicture\n");
+			} else {
+				code.append("\\endtikzpicture\n\\bye\n");
+			}
 		} else if (format == GeoGebraToPgf.FORMAT_CONTEXT) {
-			code.append("\\stoptikzpicture\n\\stopTEXpage\n\\stoptext");
-			codeBeginDoc.insert(0, "\\starttext\n");
+			if (tikzPictureOnly) {
+				code.append("\\stoptikzpicture\n");
+			} else {
+				code.append("\\stoptikzpicture\n\\stopTEXpage\n\\stoptext");
+				codeBeginDoc.insert(0, "\\starttext\n");
+			}
 		}
 		/*
 		 * String formatFont=resizeFont(app.getFontSize()); if
@@ -288,7 +300,15 @@ public class GeoGebraToPgf extends GeoGebraExport {
 			code.insert(0, codeCoordinates);
 		}
 		code.insert(0, codeBeginDoc);
-		code.insert(0, codePreamble);
+		if (!tikzPictureOnly) {
+			code.insert(0, codePreamble);
+		}
+
+		// Apply indentation if requested
+		if (indentCode) {
+			applyIndentation(code);
+		}
+
 		frame.write(code);
 	}
 
@@ -2683,6 +2703,65 @@ public class GeoGebraToPgf extends GeoGebraExport {
 		sb.append("cm,y=");
 		sb.append(yunit);
 		sb.append("cm");
+	}
+
+	/**
+	 * Apply indentation to lines inside tikzpicture environment.
+	 * @param sb the code StringBuilder to modify in place
+	 */
+	private void applyIndentation(StringBuilder sb) {
+		String content = sb.toString();
+		String[] lines = content.split("\n", -1);
+		sb.setLength(0);
+
+		boolean insideTikz = false;
+		String indent = "  "; // two spaces
+		int indentLevel = 0;
+
+		for (int i = 0; i < lines.length; i++) {
+			String line = lines[i];
+			String trimmed = line.trim();
+
+			// Check for tikzpicture start
+			if (trimmed.startsWith("\\begin{tikzpicture")
+					|| trimmed.startsWith("\\tikzpicture")
+					|| trimmed.startsWith("\\starttikzpicture")) {
+				sb.append(line);
+				insideTikz = true;
+				indentLevel = 1;
+			}
+			// Check for axis environment
+			else if (insideTikz && trimmed.startsWith("\\begin{axis}")) {
+				sb.append(indent.repeat(indentLevel)).append(trimmed);
+				indentLevel = 2;
+			}
+			// Check for end of axis
+			else if (insideTikz && trimmed.startsWith("\\end{axis}")) {
+				indentLevel = 1;
+				sb.append(indent.repeat(indentLevel)).append(trimmed);
+			}
+			// Check for tikzpicture end
+			else if (trimmed.startsWith("\\end{tikzpicture")
+					|| trimmed.startsWith("\\endtikzpicture")
+					|| trimmed.startsWith("\\stoptikzpicture")) {
+				insideTikz = false;
+				indentLevel = 0;
+				sb.append(line);
+			}
+			// Inside tikzpicture - indent if non-empty
+			else if (insideTikz && !trimmed.isEmpty()) {
+				sb.append(indent.repeat(indentLevel)).append(trimmed);
+			}
+			// Outside or empty line
+			else {
+				sb.append(line);
+			}
+
+			// Add newline except for last line
+			if (i < lines.length - 1) {
+				sb.append("\n");
+			}
+		}
 	}
 
 	/**
