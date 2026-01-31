@@ -111,6 +111,8 @@ public class BasicCommandProcessorFactory implements CommandProcessorFactory {
 			return new CmdMidpoint(kernel);
 		case Intersect:
 			return new CmdIntersect(kernel);
+		case IntersectThrough:
+			return new CmdIntersectThrough(kernel);
 		case Distance:
 			return new CmdDistance(kernel);
 		case Radius:

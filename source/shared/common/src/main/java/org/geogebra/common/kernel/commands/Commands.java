@@ -115,6 +115,8 @@ public enum Commands implements CommandsConstants,
 
 	IntersectPath(TABLE_GEOMETRY),
 
+	IntersectThrough(TABLE_GEOMETRY),
+
 	IntersectRegion(TABLE_ENGLISH),
 
 	Distance(TABLE_GEOMETRY),

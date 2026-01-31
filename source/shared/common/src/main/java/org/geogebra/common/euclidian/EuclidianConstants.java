@@ -281,6 +281,9 @@ public final class EuclidianConstants {
 	/** Incircle of Triangle */
 	public static final int MODE_INCIRCLE = 86;
 
+	/** Intersect line through two points with another line */
+	public static final int MODE_INTERSECT_THROUGH = 87;
+
 	/** Point on Object */
 	public static final int MODE_POINT_ON_OBJECT = 501;
 
@@ -673,6 +676,9 @@ public final class EuclidianConstants {
 
 		case EuclidianConstants.MODE_INCIRCLE:
 			return "Incircle.Tool";
+
+		case EuclidianConstants.MODE_INTERSECT_THROUGH:
+			return "IntersectThrough.Tool";
 
 		case EuclidianConstants.MODE_INTERSECT:
 			return "Intersect";

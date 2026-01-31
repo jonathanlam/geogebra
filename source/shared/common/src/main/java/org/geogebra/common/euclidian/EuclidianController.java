@@ -78,6 +78,7 @@ import org.geogebra.common.kernel.Region;
 import org.geogebra.common.kernel.StringTemplate;
 import org.geogebra.common.kernel.advanced.AlgoIncircle;
 import org.geogebra.common.kernel.algos.AlgoAltitude;
+import org.geogebra.common.kernel.algos.AlgoIntersectThrough;
 import org.geogebra.common.kernel.algos.AlgoCirclePointRadius;
 import org.geogebra.common.kernel.algos.AlgoDispatcher;
 import org.geogebra.common.kernel.algos.AlgoDynamicCoordinatesInterface;
@@ -2761,6 +2762,52 @@ public abstract class EuclidianController implements SpecialPointsListener {
 		return null;
 	}
 
+	/**
+	 * Creates intersection point of line through two points and another line/segment.
+	 * @param hits the hits from mouse click
+	 * @param selPreview whether this is selection preview mode
+	 * @return the created intersection point, or null if not enough objects selected
+	 */
+	protected final GeoElement[] intersectThrough(Hits hits, boolean selPreview) {
+		if (hits.isEmpty()) {
+			return null;
+		}
+
+		// First try to add points (need 2), then a line/segment
+		boolean hitPoint = addSelectedPoint(hits, 2, false, selPreview) != 0;
+
+		// If we have 2 points, look for a line/segment
+		if (!hitPoint || selPoints() == 2) {
+			if (selLines() == 0) {
+				addSelectedSegment(hits, 1, false, selPreview);
+			}
+			if (selSegments() == 0) {
+				addSelectedLine(hits, 1, false, selPreview);
+			}
+		}
+
+		// Check if we have 2 points and a line/segment
+		if (selPoints() == 2 && (selLines() == 1 || selSegments() == 1)) {
+			GeoPointND[] points = getSelectedPointsND();
+
+			GeoLine line;
+			if (selLines() == 1) {
+				GeoLineND[] lines = getSelectedLinesND();
+				line = (GeoLine) lines[0];
+			} else {
+				GeoSegmentND[] segments = getSelectedSegmentsND();
+				line = (GeoLine) segments[0];
+			}
+
+			AlgoIntersectThrough algo = new AlgoIntersectThrough(
+					kernel.getConstruction(), null,
+					points[0], points[1], line);
+
+			return new GeoElement[] { algo.getPoint() };
+		}
+		return null;
+	}
+
 	protected final GeoElement[] midpoint(Hits hits, boolean selPreview) {
 		if (hits.isEmpty()) {
 			return null;
@@ -5383,6 +5430,11 @@ public abstract class EuclidianController implements SpecialPointsListener {
 
 		case EuclidianConstants.MODE_INCIRCLE:
 			ret = incircle(hits, selectionPreview);
+			break;
+
+		// intersect line through two points with another line
+		case EuclidianConstants.MODE_INTERSECT_THROUGH:
+			ret = intersectThrough(hits, selectionPreview);
 			break;
 
 		// new line bisector

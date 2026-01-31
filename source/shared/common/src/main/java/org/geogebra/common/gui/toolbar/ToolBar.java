@@ -142,6 +142,8 @@ public class ToolBar {
 		sb.append(" , ");
 		sb.append(EuclidianConstants.MODE_INTERSECT);
 		sb.append(" ");
+		sb.append(EuclidianConstants.MODE_INTERSECT_THROUGH);
+		sb.append(" ");
 		sb.append(EuclidianConstants.MODE_MIDPOINT);
 		sb.append(" , ");
 		sb.append(EuclidianConstants.MODE_COMPLEX_NUMBER);
@@ -333,6 +335,8 @@ public class ToolBar {
 		sb.append(EuclidianConstants.MODE_ATTACH_DETACH);
 		sb.append(" , ");
 		sb.append(EuclidianConstants.MODE_INTERSECT);
+		sb.append(" ");
+		sb.append(EuclidianConstants.MODE_INTERSECT_THROUGH);
 		sb.append(" ");
 		sb.append(EuclidianConstants.MODE_MIDPOINT);
 		// sb.append(" , ");

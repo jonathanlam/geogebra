@@ -582,6 +582,7 @@ public abstract class CommandDispatcher {
 			case Point:
 			case Midpoint:
 			case Intersect:
+			case IntersectThrough:
 			case Distance:
 			case Radius:
 			case Type:
