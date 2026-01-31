@@ -205,6 +205,8 @@ public class ToolBar {
 		sb.append(EuclidianConstants.MODE_INCENTER);
 		sb.append(" ");
 		sb.append(EuclidianConstants.MODE_ORTHOCENTER);
+		sb.append(" ");
+		sb.append(EuclidianConstants.MODE_EXCENTER);
 
 		// circles, arcs
 		sb.append(" | ");

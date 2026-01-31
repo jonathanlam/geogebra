@@ -275,6 +275,9 @@ public final class EuclidianConstants {
 	/** Orthocenter of Triangle */
 	public static final int MODE_ORTHOCENTER = 84;
 
+	/** Excenters of Triangle (all 3) */
+	public static final int MODE_EXCENTER = 85;
+
 	/** Point on Object */
 	public static final int MODE_POINT_ON_OBJECT = 501;
 
@@ -661,6 +664,9 @@ public final class EuclidianConstants {
 
 		case EuclidianConstants.MODE_ORTHOCENTER:
 			return "Orthocenter.Tool";
+
+		case EuclidianConstants.MODE_EXCENTER:
+			return "Excenter.Tool";
 
 		case EuclidianConstants.MODE_INTERSECT:
 			return "Intersect";

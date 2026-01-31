@@ -97,6 +97,7 @@ import org.geogebra.common.kernel.algos.AlgoVertexConic;
 import org.geogebra.common.kernel.algos.Algos;
 import org.geogebra.common.kernel.barycentric.AlgoCentroidTriangle;
 import org.geogebra.common.kernel.barycentric.AlgoCircumcenter;
+import org.geogebra.common.kernel.barycentric.AlgoExcenter;
 import org.geogebra.common.kernel.barycentric.AlgoIncenter;
 import org.geogebra.common.kernel.barycentric.AlgoOrthocenter;
 import org.geogebra.common.kernel.arithmetic.BooleanValue;
@@ -2691,6 +2692,45 @@ public abstract class EuclidianController implements SpecialPointsListener {
 					kernel.getConstruction(), null,
 					points[0], points[1], points[2]);
 			return new GeoElement[] { algo.getResult().toGeoElement() };
+		}
+		return null;
+	}
+
+	/**
+	 * Creates all 3 excenters of a triangle from 3 points.
+	 * @param hits the hits from mouse click
+	 * @param selPreview whether this is selection preview mode
+	 * @return the created excenter points, or null if not enough points selected
+	 */
+	protected final GeoElement[] excenters(Hits hits, boolean selPreview) {
+		if (hits.isEmpty()) {
+			return null;
+		}
+
+		addSelectedPoint(hits, 3, false, selPreview);
+
+		if (selPoints() == 3) {
+			GeoPointND[] points = getSelectedPointsND();
+			Construction cons = kernel.getConstruction();
+
+			// Create index values for each excenter
+			GeoNumeric index1 = new GeoNumeric(cons, 1);
+			GeoNumeric index2 = new GeoNumeric(cons, 2);
+			GeoNumeric index3 = new GeoNumeric(cons, 3);
+
+			// Create all 3 excenters
+			AlgoExcenter algo1 = new AlgoExcenter(cons, null,
+					points[0], points[1], points[2], index1);
+			AlgoExcenter algo2 = new AlgoExcenter(cons, null,
+					points[0], points[1], points[2], index2);
+			AlgoExcenter algo3 = new AlgoExcenter(cons, null,
+					points[0], points[1], points[2], index3);
+
+			return new GeoElement[] {
+				algo1.getResult().toGeoElement(),
+				algo2.getResult().toGeoElement(),
+				algo3.getResult().toGeoElement()
+			};
 		}
 		return null;
 	}
@@ -5309,6 +5349,10 @@ public abstract class EuclidianController implements SpecialPointsListener {
 
 		case EuclidianConstants.MODE_ORTHOCENTER:
 			ret = orthocenter(hits, selectionPreview);
+			break;
+
+		case EuclidianConstants.MODE_EXCENTER:
+			ret = excenters(hits, selectionPreview);
 			break;
 
 		// new line bisector
