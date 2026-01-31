@@ -209,6 +209,9 @@ public final class EuclidianConstants {
 	/** Pen Tool */
 	public static final int MODE_PEN = 62;
 
+	/** Altitude from point to line */
+	public static final int MODE_ALTITUDE = 63;
+
 	/** Rigid Polygon */
 	public static final int MODE_RIGID_POLYGON = 64;
 
@@ -259,6 +262,18 @@ public final class EuclidianConstants {
 
 	/** Photo Library */
 	public static final int MODE_PHOTO_LIBRARY = 80;
+
+	/** Centroid of Triangle */
+	public static final int MODE_CENTROID = 81;
+
+	/** Circumcenter of Triangle */
+	public static final int MODE_CIRCUMCENTER = 82;
+
+	/** Incenter of Triangle */
+	public static final int MODE_INCENTER = 83;
+
+	/** Orthocenter of Triangle */
+	public static final int MODE_ORTHOCENTER = 84;
 
 	/** Point on Object */
 	public static final int MODE_POINT_ON_OBJECT = 501;
@@ -631,6 +646,21 @@ public final class EuclidianConstants {
 
 		case EuclidianConstants.MODE_ORTHOGONAL:
 			return "PerpendicularLine";
+
+		case EuclidianConstants.MODE_ALTITUDE:
+			return "Altitude.Tool";
+
+		case EuclidianConstants.MODE_CENTROID:
+			return "Centroid.Tool";
+
+		case EuclidianConstants.MODE_CIRCUMCENTER:
+			return "Circumcenter.Tool";
+
+		case EuclidianConstants.MODE_INCENTER:
+			return "Incenter.Tool";
+
+		case EuclidianConstants.MODE_ORTHOCENTER:
+			return "Orthocenter.Tool";
 
 		case EuclidianConstants.MODE_INTERSECT:
 			return "Intersect";

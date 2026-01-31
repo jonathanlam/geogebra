@@ -170,6 +170,8 @@ public class ToolBar {
 		sb.append(" | ");
 		sb.append(EuclidianConstants.MODE_ORTHOGONAL);
 		sb.append(" ");
+		sb.append(EuclidianConstants.MODE_ALTITUDE);
+		sb.append(" ");
 		sb.append(EuclidianConstants.MODE_PARALLEL);
 		sb.append(" ");
 		sb.append(EuclidianConstants.MODE_LINE_BISECTOR);
@@ -193,6 +195,16 @@ public class ToolBar {
 		sb.append(EuclidianConstants.MODE_RIGID_POLYGON);
 		sb.append(" , ");
 		sb.append(EuclidianConstants.MODE_VECTOR_POLYGON);
+
+		// triangle centers
+		sb.append(" | ");
+		sb.append(EuclidianConstants.MODE_CENTROID);
+		sb.append(" ");
+		sb.append(EuclidianConstants.MODE_CIRCUMCENTER);
+		sb.append(" ");
+		sb.append(EuclidianConstants.MODE_INCENTER);
+		sb.append(" ");
+		sb.append(EuclidianConstants.MODE_ORTHOCENTER);
 
 		// circles, arcs
 		sb.append(" | ");

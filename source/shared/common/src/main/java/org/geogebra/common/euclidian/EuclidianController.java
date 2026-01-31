@@ -76,6 +76,7 @@ import org.geogebra.common.kernel.Path;
 import org.geogebra.common.kernel.QuadraticEquationRepresentable;
 import org.geogebra.common.kernel.Region;
 import org.geogebra.common.kernel.StringTemplate;
+import org.geogebra.common.kernel.algos.AlgoAltitude;
 import org.geogebra.common.kernel.algos.AlgoCirclePointRadius;
 import org.geogebra.common.kernel.algos.AlgoDispatcher;
 import org.geogebra.common.kernel.algos.AlgoDynamicCoordinatesInterface;
@@ -94,6 +95,10 @@ import org.geogebra.common.kernel.algos.AlgoVector;
 import org.geogebra.common.kernel.algos.AlgoVectorPoint;
 import org.geogebra.common.kernel.algos.AlgoVertexConic;
 import org.geogebra.common.kernel.algos.Algos;
+import org.geogebra.common.kernel.barycentric.AlgoCentroidTriangle;
+import org.geogebra.common.kernel.barycentric.AlgoCircumcenter;
+import org.geogebra.common.kernel.barycentric.AlgoIncenter;
+import org.geogebra.common.kernel.barycentric.AlgoOrthocenter;
 import org.geogebra.common.kernel.arithmetic.BooleanValue;
 import org.geogebra.common.kernel.arithmetic.ExpressionNode;
 import org.geogebra.common.kernel.arithmetic.ExpressionValue;
@@ -2547,6 +2552,145 @@ public abstract class EuclidianController implements SpecialPointsListener {
 				// create new line
 				return companion.orthogonal(points[0], lines[0]);
 			}
+		}
+		return null;
+	}
+
+	/**
+	 * Creates altitude segment from point to line/segment.
+	 * @param hits the hits from mouse click
+	 * @param selPreview whether this is selection preview mode
+	 * @return the created altitude segment, or null if not enough objects selected
+	 */
+	protected final GeoElement[] altitude(Hits hits, boolean selPreview) {
+		if (hits.isEmpty()) {
+			return null;
+		}
+
+		// Try to add a point first
+		boolean hitPoint = addSelectedPoint(hits, 1, false, selPreview) != 0;
+
+		// If no point was hit, try to add a line or segment
+		if (!hitPoint) {
+			if (selLines() == 0) {
+				addSelectedSegment(hits, 1, false, selPreview);
+			}
+			if (selSegments() == 0) {
+				addSelectedLine(hits, 1, false, selPreview);
+			}
+		}
+
+		// Check if we have both a point and a line/segment
+		if (selPoints() == 1 && (selLines() == 1 || selSegments() == 1)) {
+			GeoPointND[] points = getSelectedPointsND();
+
+			Path path;
+			if (selLines() == 1) {
+				GeoLineND[] lines = getSelectedLinesND();
+				path = (Path) lines[0];
+			} else {
+				GeoSegmentND[] segments = getSelectedSegmentsND();
+				path = (Path) segments[0];
+			}
+
+			// Create the altitude using AlgoAltitude
+			AlgoAltitude algo = new AlgoAltitude(
+					kernel.getConstruction(), null,
+					points[0], path);
+
+			return new GeoElement[] { algo.getSegment() };
+		}
+		return null;
+	}
+
+	/**
+	 * Creates centroid of a triangle from 3 points.
+	 * @param hits the hits from mouse click
+	 * @param selPreview whether this is selection preview mode
+	 * @return the created centroid point, or null if not enough points selected
+	 */
+	protected final GeoElement[] centroid(Hits hits, boolean selPreview) {
+		if (hits.isEmpty()) {
+			return null;
+		}
+
+		addSelectedPoint(hits, 3, false, selPreview);
+
+		if (selPoints() == 3) {
+			GeoPointND[] points = getSelectedPointsND();
+			AlgoCentroidTriangle algo = new AlgoCentroidTriangle(
+					kernel.getConstruction(), null,
+					points[0], points[1], points[2]);
+			return new GeoElement[] { algo.getResult().toGeoElement() };
+		}
+		return null;
+	}
+
+	/**
+	 * Creates circumcenter of a triangle from 3 points.
+	 * @param hits the hits from mouse click
+	 * @param selPreview whether this is selection preview mode
+	 * @return the created circumcenter point, or null if not enough points selected
+	 */
+	protected final GeoElement[] circumcenter(Hits hits, boolean selPreview) {
+		if (hits.isEmpty()) {
+			return null;
+		}
+
+		addSelectedPoint(hits, 3, false, selPreview);
+
+		if (selPoints() == 3) {
+			GeoPointND[] points = getSelectedPointsND();
+			AlgoCircumcenter algo = new AlgoCircumcenter(
+					kernel.getConstruction(), null,
+					points[0], points[1], points[2]);
+			return new GeoElement[] { algo.getResult().toGeoElement() };
+		}
+		return null;
+	}
+
+	/**
+	 * Creates incenter of a triangle from 3 points.
+	 * @param hits the hits from mouse click
+	 * @param selPreview whether this is selection preview mode
+	 * @return the created incenter point, or null if not enough points selected
+	 */
+	protected final GeoElement[] incenter(Hits hits, boolean selPreview) {
+		if (hits.isEmpty()) {
+			return null;
+		}
+
+		addSelectedPoint(hits, 3, false, selPreview);
+
+		if (selPoints() == 3) {
+			GeoPointND[] points = getSelectedPointsND();
+			AlgoIncenter algo = new AlgoIncenter(
+					kernel.getConstruction(), null,
+					points[0], points[1], points[2]);
+			return new GeoElement[] { algo.getResult().toGeoElement() };
+		}
+		return null;
+	}
+
+	/**
+	 * Creates orthocenter of a triangle from 3 points.
+	 * @param hits the hits from mouse click
+	 * @param selPreview whether this is selection preview mode
+	 * @return the created orthocenter point, or null if not enough points selected
+	 */
+	protected final GeoElement[] orthocenter(Hits hits, boolean selPreview) {
+		if (hits.isEmpty()) {
+			return null;
+		}
+
+		addSelectedPoint(hits, 3, false, selPreview);
+
+		if (selPoints() == 3) {
+			GeoPointND[] points = getSelectedPointsND();
+			AlgoOrthocenter algo = new AlgoOrthocenter(
+					kernel.getConstruction(), null,
+					points[0], points[1], points[2]);
+			return new GeoElement[] { algo.getResult().toGeoElement() };
 		}
 		return null;
 	}
@@ -5143,6 +5287,28 @@ public abstract class EuclidianController implements SpecialPointsListener {
 		case EuclidianConstants.MODE_ORTHOGONAL:
 		case EuclidianConstants.MODE_ORTHOGONAL_THREE_D:
 			ret = orthogonal(hits, selectionPreview);
+			break;
+
+		// altitude from point to line
+		case EuclidianConstants.MODE_ALTITUDE:
+			ret = altitude(hits, selectionPreview);
+			break;
+
+		// triangle centers
+		case EuclidianConstants.MODE_CENTROID:
+			ret = centroid(hits, selectionPreview);
+			break;
+
+		case EuclidianConstants.MODE_CIRCUMCENTER:
+			ret = circumcenter(hits, selectionPreview);
+			break;
+
+		case EuclidianConstants.MODE_INCENTER:
+			ret = incenter(hits, selectionPreview);
+			break;
+
+		case EuclidianConstants.MODE_ORTHOCENTER:
+			ret = orthocenter(hits, selectionPreview);
 			break;
 
 		// new line bisector
