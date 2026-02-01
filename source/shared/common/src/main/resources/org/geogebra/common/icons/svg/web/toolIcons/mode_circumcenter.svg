@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <!-- Circumcircle -->
+  <circle cx="256" cy="260" r="160" fill="none" stroke="red" stroke-width="13"/>
+  <!-- Triangle sides -->
+  <path fill="none" stroke="#000" stroke-width="13" d="M100 360 L412 360"/>
+  <path fill="none" stroke="#000" stroke-width="13" d="M100 360 L256 120"/>
+  <path fill="none" stroke="#000" stroke-width="13" d="M256 120 L412 360"/>
+  <!-- Vertex points (blue) -->
+  <circle cx="100" cy="360" r="20" fill="#00f" stroke="#000" stroke-width="4"/>
+  <circle cx="412" cy="360" r="20" fill="#00f" stroke="#000" stroke-width="4"/>
+  <circle cx="256" cy="120" r="20" fill="#00f" stroke="#000" stroke-width="4"/>
+  <!-- Circumcenter point (red) -->
+  <circle cx="256" cy="260" r="20" fill="red" stroke="#000" stroke-width="4"/>
+</svg>

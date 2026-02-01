@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <!-- Triangle sides -->
+  <path fill="none" stroke="#000" stroke-width="13" d="M60 420 L452 420"/>
+  <path fill="none" stroke="#000" stroke-width="13" d="M60 420 L256 80"/>
+  <path fill="none" stroke="#000" stroke-width="13" d="M256 80 L452 420"/>
+  <!-- Incircle -->
+  <circle cx="256" cy="320" r="100" fill="none" stroke="red" stroke-width="13"/>
+  <!-- Vertex points (blue) -->
+  <circle cx="60" cy="420" r="20" fill="#00f" stroke="#000" stroke-width="4"/>
+  <circle cx="452" cy="420" r="20" fill="#00f" stroke="#000" stroke-width="4"/>
+  <circle cx="256" cy="80" r="20" fill="#00f" stroke="#000" stroke-width="4"/>
+  <!-- Incenter point (red) -->
+  <circle cx="256" cy="320" r="20" fill="red" stroke="#000" stroke-width="4"/>
+</svg>

@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <!-- Triangle sides -->
+  <path fill="none" stroke="#000" stroke-width="13" d="M100 380 L412 380"/>
+  <path fill="none" stroke="#000" stroke-width="13" d="M100 380 L256 120"/>
+  <path fill="none" stroke="#000" stroke-width="13" d="M256 120 L412 380"/>
+  <!-- Extended sides (dashed) for excircle tangency -->
+  <path fill="none" stroke="#000" stroke-width="8" stroke-dasharray="20,15" d="M100 380 L20 380"/>
+  <path fill="none" stroke="#000" stroke-width="8" stroke-dasharray="20,15" d="M412 380 L492 380"/>
+  <!-- Excircle (outside triangle, tangent to one side and extensions of others) -->
+  <circle cx="256" cy="500" r="90" fill="none" stroke="red" stroke-width="13"/>
+  <!-- Triangle vertices (input) - blue -->
+  <circle cx="256" cy="120" r="35" fill="#00f"/>
+  <path d="M256 93c14.888 0 27 12.112 27 27s-12.112 27-27 27-27-12.112-27-27 12.112-27 27-27m0-13c-22.091 0-40 17.909-40 40s17.909 40 40 40 40-17.909 40-40-17.909-40-40-40z"/>
+  <circle cx="100" cy="380" r="35" fill="#00f"/>
+  <path d="M100 353c14.888 0 27 12.112 27 27s-12.112 27-27 27-27-12.112-27-27 12.112-27 27-27m0-13c-22.091 0-40 17.909-40 40s17.909 40 40 40 40-17.909 40-40-17.909-40-40-40z"/>
+  <circle cx="412" cy="380" r="35" fill="#00f"/>
+  <path d="M412 353c14.888 0 27 12.112 27 27s-12.112 27-27 27-27-12.112-27-27 12.112-27 27-27m0-13c-22.091 0-40 17.909-40 40s17.909 40 40 40 40-17.909 40-40-17.909-40-40-40z"/>
+</svg>

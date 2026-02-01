@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <!-- Target line/segment to intersect with -->
+  <path fill="none" stroke="#000" stroke-width="13" d="M40 120 L472 400"/>
+  <!-- Line through the two input points (shown in red) -->
+  <path fill="none" stroke="red" stroke-width="13" d="M120 450 L400 50"/>
+  <!-- First input point - blue -->
+  <circle cx="160" cy="400" r="35" fill="#00f"/>
+  <path d="M160 373c14.888 0 27 12.112 27 27s-12.112 27-27 27-27-12.112-27-27 12.112-27 27-27m0-13c-22.091 0-40 17.909-40 40s17.909 40 40 40 40-17.909 40-40-17.909-40-40-40z"/>
+  <!-- Second input point - blue -->
+  <circle cx="340" cy="175" r="35" fill="#00f"/>
+  <path d="M340 148c14.888 0 27 12.112 27 27s-12.112 27-27 27-27-12.112-27-27 12.112-27 27-27m0-13c-22.091 0-40 17.909-40 40s17.909 40 40 40 40-17.909 40-40-17.909-40-40-40z"/>
+  <!-- Intersection point (output) - red -->
+  <circle cx="256" cy="280" r="35" fill="red"/>
+  <path d="M256 253c14.888 0 27 12.112 27 27s-12.112 27-27 27-27-12.112-27-27 12.112-27 27-27m0-13c-22.091 0-40 17.909-40 40s17.909 40 40 40 40-17.909 40-40-17.909-40-40-40z"/>
+</svg>

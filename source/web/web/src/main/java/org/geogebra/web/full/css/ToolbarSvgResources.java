@@ -45,6 +45,18 @@ public interface ToolbarSvgResources extends ClientBundle, ToolbarResources {
 	@Override
 	SVGResource mode_area_32();
 
+	@Source("org/geogebra/common/icons/svg/web/toolIcons/mode_altitude.svg")
+	@Override
+	SVGResource mode_altitude_32();
+
+	@Source("org/geogebra/common/icons/svg/web/toolIcons/mode_centroid.svg")
+	@Override
+	SVGResource mode_centroid_32();
+
+	@Source("org/geogebra/common/icons/svg/web/toolIcons/mode_circumcenter.svg")
+	@Override
+	SVGResource mode_circumcenter_32();
+
 	@Source("org/geogebra/common/icons/svg/web/toolIcons/mode_attachdetachpoint.svg")
 	@Override
 	SVGResource mode_attachdetachpoint_32();
@@ -121,6 +133,10 @@ public interface ToolbarSvgResources extends ClientBundle, ToolbarResources {
 	@Override
 	SVGResource mode_extremum_32();
 
+	@Source("org/geogebra/common/icons/svg/web/toolIcons/mode_excenter.svg")
+	@Override
+	SVGResource mode_excenter_32();
+
 	@Source("org/geogebra/common/icons/svg/web/toolIcons/mode_fitline.svg")
 	@Override
 	SVGResource mode_fitline_32();
@@ -180,6 +196,10 @@ public interface ToolbarSvgResources extends ClientBundle, ToolbarResources {
 	@Source("org/geogebra/common/icons/svg/web/toolIcons/mode_movearoundpoint.svg")
 	@Override
 	SVGResource mode_moverotate_32();
+
+	@Source("org/geogebra/common/icons/svg/web/toolIcons/mode_orthocenter.svg")
+	@Override
+	SVGResource mode_orthocenter_32();
 
 	@Source("org/geogebra/common/icons/svg/web/toolIcons/mode_perpendicularline.svg")
 	@Override
@@ -360,6 +380,10 @@ public interface ToolbarSvgResources extends ClientBundle, ToolbarResources {
 	@Source("org/geogebra/common/icons/svg/web/toolIcons/mode_intersecttwosurfaces.svg")
 	@Override
 	SVGResource mode_intersectioncurve_32();
+
+	@Source("org/geogebra/common/icons/svg/web/toolIcons/mode_intersectthrough.svg")
+	@Override
+	SVGResource mode_intersectthrough_32();
 
 	@Source("org/geogebra/common/icons/svg/web/toolIcons/mode_keepinput.svg")
 	@Override
@@ -555,6 +579,14 @@ public interface ToolbarSvgResources extends ClientBundle, ToolbarResources {
 	@Override
 	@Source("org/geogebra/common/icons/svg/web/toolIcons/mode_image_mow.svg")
 	SVGResource mode_image_mow_32();
+
+	@Source("org/geogebra/common/icons/svg/web/toolIcons/mode_incircle.svg")
+	@Override
+	SVGResource mode_incircle_32();
+
+	@Source("org/geogebra/common/icons/svg/web/toolIcons/mode_incenter.svg")
+	@Override
+	SVGResource mode_incenter_32();
 
 	@Override
 	@Source("org/geogebra/common/icons/svg/web/toolIcons/mode_geogebra.svg")

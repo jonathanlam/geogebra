@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <!-- Triangle sides -->
+  <path fill="none" stroke="#000" stroke-width="13" d="M80 400 L432 400"/>
+  <path fill="none" stroke="#000" stroke-width="13" d="M80 400 L256 80"/>
+  <path fill="none" stroke="#000" stroke-width="13" d="M256 80 L432 400"/>
+  <!-- Medians (from each vertex to opposite midpoint) -->
+  <path fill="none" stroke="red" stroke-width="8" d="M80 400 L344 240"/>
+  <path fill="none" stroke="red" stroke-width="8" d="M432 400 L168 240"/>
+  <path fill="none" stroke="red" stroke-width="8" d="M256 80 L256 400"/>
+  <!-- Vertex points (blue) -->
+  <circle cx="80" cy="400" r="20" fill="#00f" stroke="#000" stroke-width="4"/>
+  <circle cx="432" cy="400" r="20" fill="#00f" stroke="#000" stroke-width="4"/>
+  <circle cx="256" cy="80" r="20" fill="#00f" stroke="#000" stroke-width="4"/>
+  <!-- Centroid point (red) -->
+  <circle cx="256" cy="293" r="20" fill="red" stroke="#000" stroke-width="4"/>
+</svg>

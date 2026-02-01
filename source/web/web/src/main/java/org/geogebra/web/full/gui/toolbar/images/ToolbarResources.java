@@ -32,6 +32,12 @@ public interface ToolbarResources {
 
 	SVGResource mode_area_32();
 
+	SVGResource mode_altitude_32();
+
+	SVGResource mode_centroid_32();
+
+	SVGResource mode_circumcenter_32();
+
 	SVGResource mode_attachdetachpoint_32();
 
 	SVGResource mode_buttonaction_32();
@@ -86,6 +92,8 @@ public interface ToolbarResources {
 
 	SVGResource mode_extremum_32();
 
+	SVGResource mode_excenter_32();
+
 	SVGResource mode_factor_32();
 
 	SVGResource mode_fitline_32();
@@ -100,11 +108,17 @@ public interface ToolbarResources {
 
 	SVGResource mode_image_mow_32();
 
+	SVGResource mode_incircle_32();
+
+	SVGResource mode_incenter_32();
+
 	SVGResource mode_integral_32();
 
 	SVGResource mode_intersect_32();
 
 	SVGResource mode_intersectioncurve_32();
+
+	SVGResource mode_intersectthrough_32();
 
 	SVGResource mode_join_32();
 
@@ -139,6 +153,8 @@ public interface ToolbarResources {
 	SVGResource mode_numeric_32();
 
 	SVGResource mode_onevarstats_32();
+
+	SVGResource mode_orthocenter_32();
 
 	SVGResource mode_orthogonal_32();
 
