@@ -79,6 +79,7 @@ import org.geogebra.common.kernel.StringTemplate;
 import org.geogebra.common.kernel.advanced.AlgoIncircle;
 import org.geogebra.common.kernel.algos.AlgoAltitude;
 import org.geogebra.common.kernel.algos.AlgoIntersectThrough;
+import org.geogebra.common.kernel.algos.AlgoIntersectThroughConic;
 import org.geogebra.common.kernel.algos.AlgoCirclePointRadius;
 import org.geogebra.common.kernel.algos.AlgoDispatcher;
 import org.geogebra.common.kernel.algos.AlgoDynamicCoordinatesInterface;
@@ -2773,16 +2774,19 @@ public abstract class EuclidianController implements SpecialPointsListener {
 			return null;
 		}
 
-		// First try to add points (need 2), then a line/segment
+		// First try to add points (need 2), then a line/segment/conic
 		boolean hitPoint = addSelectedPoint(hits, 2, false, selPreview) != 0;
 
-		// If we have 2 points, look for a line/segment
+		// If we have 2 points, look for a line/segment/conic
 		if (!hitPoint || selPoints() == 2) {
-			if (selLines() == 0) {
+			if (selLines() == 0 && selConics() == 0) {
 				addSelectedSegment(hits, 1, false, selPreview);
 			}
-			if (selSegments() == 0) {
+			if (selSegments() == 0 && selConics() == 0) {
 				addSelectedLine(hits, 1, false, selPreview);
+			}
+			if (selLines() == 0 && selSegments() == 0) {
+				addSelectedConic(hits, 1, false, selPreview);
 			}
 		}
 
@@ -2804,6 +2808,18 @@ public abstract class EuclidianController implements SpecialPointsListener {
 					points[0], points[1], line);
 
 			return new GeoElement[] { algo.getPoint() };
+		}
+
+		// Check if we have 2 points and a conic
+		if (selPoints() == 2 && selConics() == 1) {
+			GeoPointND[] points = getSelectedPointsND();
+			GeoConicND[] conics = getSelectedConicsND();
+
+			AlgoIntersectThroughConic algo = new AlgoIntersectThroughConic(
+					kernel.getConstruction(), null,
+					points[0], points[1], (GeoConic) conics[0]);
+
+			return algo.getPoints();
 		}
 		return null;
 	}

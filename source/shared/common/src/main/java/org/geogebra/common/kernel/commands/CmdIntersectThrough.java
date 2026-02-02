@@ -18,7 +18,9 @@ package org.geogebra.common.kernel.commands;
 
 import org.geogebra.common.kernel.Kernel;
 import org.geogebra.common.kernel.algos.AlgoIntersectThrough;
+import org.geogebra.common.kernel.algos.AlgoIntersectThroughConic;
 import org.geogebra.common.kernel.arithmetic.Command;
+import org.geogebra.common.kernel.geos.GeoConic;
 import org.geogebra.common.kernel.geos.GeoElement;
 import org.geogebra.common.kernel.geos.GeoLine;
 import org.geogebra.common.kernel.kernelND.GeoPointND;
@@ -26,8 +28,9 @@ import org.geogebra.common.main.MyError;
 
 /**
  * IntersectThrough[<Point A>, <Point B>, <Line or Segment l>]
+ * IntersectThrough[<Point A>, <Point B>, <Circle c>]
  *
- * Returns the intersection of the line through A and B with line/segment l.
+ * Returns the intersection of the line through A and B with line/segment l or circle c.
  * This combines the Line[A,B] and Intersect commands into a single step.
  */
 public class CmdIntersectThrough extends CommandProcessor {
@@ -63,6 +66,20 @@ public class CmdIntersectThrough extends CommandProcessor {
 
 				GeoElement[] ret = { algo.getPoint() };
 				return ret;
+			}
+
+			// IntersectThrough[<Point>, <Point>, <Conic>]
+			if ((ok[0] = arg[0].isGeoPoint())
+					&& (ok[1] = arg[1].isGeoPoint())
+					&& (ok[2] = arg[2].isGeoConic())) {
+
+				AlgoIntersectThroughConic algo = new AlgoIntersectThroughConic(cons,
+						c.getLabels(),
+						(GeoPointND) arg[0],
+						(GeoPointND) arg[1],
+						(GeoConic) arg[2]);
+
+				return algo.getPoints();
 			}
 
 			throw argErr(c, getBadArg(ok, arg));
