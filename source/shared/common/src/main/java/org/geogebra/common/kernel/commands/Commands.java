@@ -165,6 +165,8 @@ public enum Commands implements CommandsConstants,
 
 	Barycenter(TABLE_GEOMETRY),
 
+	Miquel(TABLE_GEOMETRY),
+
 	Trilinear(TABLE_GEOMETRY),
 
 	Cubic(TABLE_GEOMETRY),

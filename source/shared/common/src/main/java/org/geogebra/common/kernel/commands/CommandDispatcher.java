@@ -879,6 +879,7 @@ public abstract class CommandDispatcher {
 			case Circumcenter:
 			case Orthocenter:
 			case Barycenter:
+			case Miquel:
 			case Trilinear:
 			case Cubic:
 			case TriangleCurve:

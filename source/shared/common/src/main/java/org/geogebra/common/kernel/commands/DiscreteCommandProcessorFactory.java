@@ -23,6 +23,7 @@ import org.geogebra.common.kernel.barycentric.CmdCubic;
 import org.geogebra.common.kernel.barycentric.CmdExcenter;
 import org.geogebra.common.kernel.barycentric.CmdIncenter;
 import org.geogebra.common.kernel.barycentric.CmdKimberling;
+import org.geogebra.common.kernel.barycentric.CmdMiquel;
 import org.geogebra.common.kernel.barycentric.CmdOrthocenter;
 import org.geogebra.common.kernel.barycentric.CmdTriangleCurve;
 import org.geogebra.common.kernel.barycentric.CmdTrilinear;
@@ -55,6 +56,8 @@ public class DiscreteCommandProcessorFactory implements CommandProcessorFactory 
 			return new CmdOrthocenter(kernel);
 		case Barycenter:
 			return new CmdBarycenter(kernel);
+		case Miquel:
+			return new CmdMiquel(kernel);
 		case Trilinear:
 			return new CmdTrilinear(kernel);
 		case Cubic:
